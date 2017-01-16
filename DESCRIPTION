@@ -27,6 +27,7 @@ Suggests:
     DT
 VignetteBuilder: knitr
 Collate:
+    'gui.R'
     'loading.R'
     'package.R'
 RoxygenNote: 5.0.1

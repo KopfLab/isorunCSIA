@@ -11,4 +11,5 @@
 #' @importFrom stringr str_match_all
 #'
 #' @include loading.R
+#' @include gui.R
 NULL
