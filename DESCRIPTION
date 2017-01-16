@@ -1,0 +1,32 @@
+Package: isorunCSIA
+Type: Package
+Version: 0.1
+Date: 2017-01-15
+Author: Sebastian Kopf
+Maintainer: Sebastian Kopf <sebastian.kopf@colorado.edu>
+License: GPL-3
+Roxygen: list(wrap = FALSE)
+URL: https://github.com/kopflab/isorunCSIA
+BugReports: https://github.com/kopflab/isorunCSIA/issues
+Imports:
+    methods,
+    stringr,
+    isoread,
+    tidyr,
+    dplyr,
+    ggplot2
+Suggests:
+    testthat,
+    rmarkdown,
+    knitr,
+    openxlsx,
+    shiny,
+    shinyBS,
+    shinydashboard,
+    shinyAce,
+    DT
+VignetteBuilder: knitr
+Collate:
+    'loading.R'
+    'package.R'
+RoxygenNote: 5.0.1
