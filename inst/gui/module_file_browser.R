@@ -130,7 +130,7 @@ fileSelector <- function(input, output, session,
       }
 
       # something changed --> update contents list
-      message("(Re)loading folder: ", path)
+      message("INFO: (Re)loading folder: ", path, " (NS: ", ns(""),")")
       values$current_directory_content <- new_content
       folders <- list.dirs(path, rec=FALSE, full.names = T) # w/ full names
       files <- setdiff(list.files(path, full.names = T, pattern = pattern), folders)

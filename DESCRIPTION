@@ -10,6 +10,7 @@ URL: https://github.com/kopflab/isorunCSIA
 BugReports: https://github.com/kopflab/isorunCSIA/issues
 Imports:
     methods,
+    R.utils,
     stringr,
     isoread,
     tidyr,
@@ -24,7 +25,9 @@ Suggests:
     shinyBS,
     shinydashboard,
     shinyAce,
-    DT
+    DT,
+    data.table,
+    rhandsontable
 VignetteBuilder: knitr
 Collate:
     'gui.R'
