@@ -18,20 +18,82 @@ server <- shinyServer(function(input, output, session) {
   # SETTINGS =======
   settings <- read_excel(file.path(data_dir, SETTINGS_FILE), sheet = "global")
   parameters <- read_excel(file.path(data_dir, SETTINGS_FILE), sheet = "parameters")
-  element_parameters <- list()
-  for (element in ELEMENTS) {
-    element_parameters[[element]] <- parameters %>%
-        filter(Category == "background", Element == "all" | grepl(element, Element, fixed=TRUE)) %>%
-        mutate(Check = FALSE, Value = NA_real_)
-  }
-
 
   # REACTIVE VALUES ----
   values <- reactiveValues(
     tuning_file_preview = NULL,
-    bgrd_hot = NULL,
-    bgrd_saved = NULL
+    history_variables = c()
   )
+
+  # INSTRUMENT NEW PARAMETER RECORD ----
+  history_files <- expand.grid(Element = ELEMENTS, Category = names(HISTORY_FILES)) %>%
+    mutate(
+      filename = HISTORY_FILES[Category],
+      filepath = file.path(data_dir, INSTRUMENT_HISTORY_FOLDER, paste0(Element, "_", filename))
+    )
+  background_table <- callModule(
+    historyInfoTable, "background", parameters = parameters, history_files = history_files,
+    element_input = reactive(input$element), clear_input = reactive(input$instrument_new_clear))
+
+  sensitivity_table <- callModule(
+    historyInfoTable, "sensitivity", parameters = parameters, history_files = history_files,
+    element_input = reactive(input$element), clear_input = reactive(input$instrument_new_clear))
+
+  instrument_table <- callModule(
+    historyInfoTable, "parameters", parameters = parameters, history_files = history_files,
+    element_input = reactive(input$element), clear_input = reactive(input$instrument_new_clear))
+
+  # INSTRUMENT PARAMETER HISTORY ----
+  get_history_data <- reactivePoll(100000, session,
+    # checks every second whether any of the history files were modified
+    checkFunc = function() {
+      sapply(history_files$filepath, function(path) {
+        if(file.exists(path)) file.info(path)$mtime[1] else ""
+      }) %>% paste(collapse = "|")
+    },
+    # reads the log files
+    valueFunc = function() {
+      message("INFO: re-loading history files")
+      history_files %>% group_by(Element, Category, filepath) %>%
+        do({
+          print(.$filepath[1])
+          if (file.exists(.$filepath[1])) {
+            read.csv(.$filepath[1], header = TRUE, stringsAsFactors = FALSE,
+                     row.names = NULL, colClasses = c(timestamp = "POSIXct")) %>%
+              gather(Column, value, -timestamp, -Notes)
+          } else {
+            data_frame()
+          }
+        }) %>%
+        ungroup() %>%
+        left_join(
+          rename(parameters, Element_def = Element),
+          by = c("Category", "Column"))
+    }
+  )
+
+  # update the selection box
+  observe({
+    history_vars <- get_history_data() %>%
+      filter(Type == "numeric") %>%  # only numerics
+      filter(Element %in% input$history_element) %>%
+      filter(Category %in% input$history_category) %>%
+      mutate(Label = paste0(Caption, " [", Units, "]: ", Element_def, "")) %>%
+      select(Column, Label) %>%
+      distinct() %>% arrange(Column)
+    options <- history_vars$Column %>% setNames(history_vars$Label)
+    selected <- options[options %in% isolate(values$history_variables)]
+    updateSelectInput(session, "history_variables",
+                      choices = history_vars$Column %>% setNames(history_vars$Label),
+                      selected = selected)
+  })
+
+  # save the selected rows in the reactive values
+  observe({
+    selected_variables <- input$history_variables
+    message("INFO: storing selection") # debug
+    isolate(values$history_variables <- selected_variables)
+  })
 
 
   # TUNING: File selection ----
@@ -41,21 +103,6 @@ server <- shinyServer(function(input, output, session) {
                            root = data_dir, root_name = "Available", size = 8)
 
 
-  # parameter collection
-  background_table <- callModule(
-    historyInfoTable, "background", parameters = parameters,
-    element_input = reactive(input$element), clear_input = reactive(input$instrument_new_clear),
-    history_file = file.path(data_dir, INSTRUMENT_HISTORY_FOLDER, BACKGROUND_HISTORY_FILE))
-
-  sensitivity_table <- callModule(
-    historyInfoTable, "sensitivity", parameters = parameters,
-    element_input = reactive(input$element), clear_input = reactive(input$instrument_new_clear),
-    history_file = file.path(data_dir, INSTRUMENT_HISTORY_FOLDER, SENSITIVITY_HISTORY_FILE))
-
-  instrument_table <- callModule(
-    historyInfoTable, "parameters", parameters = parameters,
-    element_input = reactive(input$element), clear_input = reactive(input$instrument_new_clear),
-    history_file = file.path(data_dir, INSTRUMENT_HISTORY_FOLDER, PARAMETERS_HISTORY_FILE))
 
 
   # TUNING ----

@@ -46,58 +46,50 @@ ui <- dashboardPage(
     tabItem(
       tabName = "instrument",
       tabsetPanel(
-        id = "instrument_tabs",
+        id = "instrument_tabs", selected = "params",
         tabPanel("New", value = "new",
 
                  h4(actionLink("instrument_new_clear", "Clear all", icon = icon("rotate-left"))),
 
                  h2("Background"),
-
                  historyInfoInput(id = "background"),
                  historyArchiveButton(id = "background"),
 
                  h2("Sensitivity"),
-
                  historyInfoInput(id = "sensitivity"),
                  historyArchiveButton(id = "sensitivity"),
-
                  h4("Peak shape"),
 
                  h2("Instrument parameters"),
-
                  historyInfoInput(id = "parameters"),
                  historyArchiveButton(id = "parameters"),
 
                  h2("Isotopic stability"),
-
                  h4("ON/OFFs"),
-
-                 h4("Linearity"),
-
-
-                 conditionalPanel( # carbon
-                   condition = "input.element=='carbon'",
-                   p("Switch to CO2 gas configuration, turn on CO2 reference gas at dilution ?, ")
-                 ),
-                 conditionalPanel( # hydrogen
-                   condition = "input.element=='hydrogen'",
-                   p("Switch to your H2 gas configuration")
-                 ),
-
-
-                 conditionalPanel(
-                   condition = "input.element=='carbon'",
-                   h1("load linearity")
-                 ),
-
-                 conditionalPanel(
-                   condition = "input.element=='hydrogen'",
-                   h1("load H2 factor")
-                 )
+                 h4("Linearity")
 
                  ),
-        tabPanel("Parameter History", value = "params",
-                 h1("temp")),
+        tabPanel(
+          "Parameter History", value = "params",
+          p(
+            div(style="display:inline-block",
+                selectInput("history_element", label = NULL, multiple = TRUE, width = "300px",
+                            choices = ELEMENTS, selected = ELEMENTS),
+                bsTooltip("history_element", "Which elements to consider", placement = "top", trigger = "hover")
+            ),
+            div(style="display:inline-block",
+                selectInput("history_category", label = NULL, multiple = TRUE, width = "300px",
+                            choices = names(HISTORY_FILES), selected = names(HISTORY_FILES)),
+                bsTooltip("history_category", "Which parameter groups", placement = "top", trigger = "hover")
+            ),
+            #h4("Parameters to show", `for` = "history_variables"),
+            selectInput("history_variables", label = NULL, multiple = TRUE, size = 5, selectize = FALSE, width = "600px",
+                        choices = names(HISTORY_FILES), selected = names(HISTORY_FILES)),
+            dateRangeInput("history_date_range", label = NULL,
+                           format = "yyyy-mm-dd", startview = "month", weekstart = 0,
+                           language = "en", separator = " to ")
+          )
+        ),
         tabPanel("Full scan History", value = "full_scans",
                  h1("temp")),
         tabPanel("Peak shape History", value = "peak_shapes",

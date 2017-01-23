@@ -18,8 +18,8 @@ historyArchiveButton <- function(id, caption = id) {
 
 #---- SERVER SIDE
 historyInfoTable <- function(input, output, session,
-                             parameters, element_input, clear_input,
-                             history_file) {
+                             parameters, history_files,
+                             element_input, clear_input) {
 
   # namespace
   ns <- session$ns
@@ -69,10 +69,21 @@ historyInfoTable <- function(input, output, session,
         data_frame(Notes = input$notes))
     })
 
-    ele_history_file <- file.path(dirname(history_file), paste0(isolate(element_input()), "_", basename(history_file)))
+    # check for consistency with previous history files
+    ele_history_file <- filter(history_files, element == isolate(element_input()), group == ns(NULL))$filepath[1]
+    if (length(ele_history_file) == 0) stop("can't find history file for this element and parameter group")
     message("INFO: saving '", ns(NULL), "' parameters for ", isolate(element_input()), " in ", ele_history_file)
     if (file.exists(ele_history_file)) {
-      write.table(data, file = ele_history_file, row.names = FALSE, sep = ",", append = TRUE, col.names = FALSE)
+      check_headers <- read.csv(file = ele_history_file, header = TRUE, nrows = 1, stringsAsFactors = FALSE)
+      if (ncol(check_headers) != ncol(data) || !all(names(check_headers) == names(data))) {
+        old_data <- read.csv(file = ele_history_file, header = TRUE, stringsAsFactors = FALSE)
+        old_ele_history_file <- sub("\\.csv", paste0("_deprecated_", Sys.time() %>% format("%Y%m%d_%H%M%S"), ".csv"), ele_history_file)
+        message("WARNING: headers in history file don't match new data set --> deprecating history file to ", basename(old_ele_history_file))
+        file.rename(ele_history_file, old_ele_history_file)
+        write.table(data, file = ele_history_file, row.names = FALSE, sep = ",", col.names = TRUE)
+      } else {
+        write.table(data, file = ele_history_file, row.names = FALSE, sep = ",", append = TRUE, col.names = FALSE)
+      }
     } else {
       write.table(data, file = ele_history_file, row.names = FALSE, sep = ",", col.names = TRUE)
     }

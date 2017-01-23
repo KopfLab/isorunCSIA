@@ -23,9 +23,11 @@ source("utils.R")
 SIDEBAR_WIDTH <- 150 #px
 SETTINGS_FILE <- "isorunCSIA_settings.xlsx"
 INSTRUMENT_HISTORY_FOLDER <- "instrument_history"
-BACKGROUND_HISTORY_FILE <- "instrument_background_history.csv"
-SENSITIVITY_HISTORY_FILE <- "instrument_sensitivity_history.csv"
-PARAMETERS_HISTORY_FILE <- "instrument_parameters_history.csv"
+HISTORY_FILES <- c(
+  "background" = "instrument_background_history.csv",
+  "sensitivity" = "instrument_sensitivity_history.csv",
+  "parameters" = "instrument_parameters_history.csv"
+)
 ELEMENTS <- c("carbon", "hydrogen", "nitrogen")
 
 # make sure base directory is set
