@@ -105,7 +105,8 @@ server <- shinyServer(function(input, output, session) {
     # reads the log files
     valueFunc = function() {
       message("INFO: re-loading history files")
-      history_files %>% group_by(Element, Category, filepath) %>%
+      files <-
+        history_files %>% group_by(Element, Category, filepath) %>%
         do({
           if (file.exists(.$filepath[1])) {
             read.csv(.$filepath[1], header = TRUE, stringsAsFactors = FALSE,
@@ -115,17 +116,22 @@ server <- shinyServer(function(input, output, session) {
             data_frame()
           }
         }) %>%
-        ungroup() %>%
+        ungroup()
+      if (nrow(files) == 0) return(NULL)
+      else {
+        files %>%
         left_join(
           rename(parameters, Element_def = Element),
           by = c("Category", "Column")) %>%
         mutate(date = as.Date(timestamp, tz = format(timestamp[1], "%Z"))) %>%
         select(-filepath) %>% filter(!is.na(Type))
+      }
     }
   )
 
   # update the variable selection box and date range
   observe({
+    validate(need(get_history_data(), message = FALSE))
     history_vars <- get_history_data() %>%
       filter(Type == "numeric") %>%  # only numerics
       filter(Element %in% input$history_element) %>%
@@ -147,6 +153,7 @@ server <- shinyServer(function(input, output, session) {
 
   # save the selected rows in the reactive values
   observe({
+    validate(need(input$history_variables, message = FALSE))
     selected_variables <- input$history_variables
     message("INFO: storing history parameter selection: '", paste(selected_variables, collapse = ", "), "'") # debug
     isolate(values$history_variables <- selected_variables)
