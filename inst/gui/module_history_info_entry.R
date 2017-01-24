@@ -70,8 +70,8 @@ historyInfoTable <- function(input, output, session,
     })
 
     # check for consistency with previous history files
-    ele_history_file <- filter(history_files, element == isolate(element_input()), group == ns(NULL))$filepath[1]
-    if (length(ele_history_file) == 0) stop("can't find history file for this element and parameter group")
+    ele_history_file <- filter(history_files, Element == isolate(element_input()), Category == ns(NULL))$filepath[1]
+    if (length(ele_history_file) == 0) stop("can't find history file for this element and parameter category")
     message("INFO: saving '", ns(NULL), "' parameters for ", isolate(element_input()), " in ", ele_history_file)
     if (file.exists(ele_history_file)) {
       check_headers <- read.csv(file = ele_history_file, header = TRUE, nrows = 1, stringsAsFactors = FALSE)

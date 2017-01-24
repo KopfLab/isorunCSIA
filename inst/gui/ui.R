@@ -26,6 +26,7 @@ ui <- dashboardPage(
     # STYLESHEET ----
     tags$head(
       tags$style(HTML(".shiny-output-error-validation { color: red; font-size: 16px; }")),
+      tags$style(HTML(".shiny-output-error-info { color: black; font-size: 20px; padding: 20px; }")),
       tags$style(type = "text/css", ".sidebar {height:1300px}") # FIXME: make this dynamically long enough
     ),
 
@@ -53,6 +54,8 @@ ui <- dashboardPage(
 
                  h2("Background"),
                  historyInfoInput(id = "background"),
+                 fileInput('full_scan_file', 'Choose Full Scan',
+                           accept=c('.scn')),
                  historyArchiveButton(id = "background"),
 
                  h2("Sensitivity"),
@@ -69,27 +72,49 @@ ui <- dashboardPage(
                  h4("Linearity")
 
                  ),
+
+        # PARAMETER HISTORY ----
         tabPanel(
           "Parameter History", value = "params",
-          p(
-            div(style="display:inline-block",
-                selectInput("history_element", label = NULL, multiple = TRUE, width = "300px",
-                            choices = ELEMENTS, selected = ELEMENTS),
-                bsTooltip("history_element", "Which elements to consider", placement = "top", trigger = "hover")
+          # Parameter selection box
+          box(
+            title = "Parameter selection", collapsible = TRUE,
+            status = "success", solidHeader = TRUE, width = 12,
+            fluidRow(
+              column(width = 6,
+                     selectInput("history_element", label = NULL, multiple = TRUE,
+                                 choices = ELEMENTS, selected = ELEMENTS),
+                     bsTooltip("history_element", "Which elements to consider", placement = "top", trigger = "hover")
+              ),
+              column(width = 6,
+                     selectInput("history_category", label = NULL, multiple = TRUE,
+                                 choices = names(HISTORY_FILES), selected = names(HISTORY_FILES)),
+                     bsTooltip("history_category", "Which parameter groups", placement = "top", trigger = "hover")
+              )
             ),
-            div(style="display:inline-block",
-                selectInput("history_category", label = NULL, multiple = TRUE, width = "300px",
-                            choices = names(HISTORY_FILES), selected = names(HISTORY_FILES)),
-                bsTooltip("history_category", "Which parameter groups", placement = "top", trigger = "hover")
-            ),
-            #h4("Parameters to show", `for` = "history_variables"),
-            selectInput("history_variables", label = NULL, multiple = TRUE, size = 5, selectize = FALSE, width = "600px",
-                        choices = names(HISTORY_FILES), selected = names(HISTORY_FILES)),
+            selectInput("history_variables", label = NULL, multiple = TRUE, size = 5, selectize = FALSE,
+                        choices = c(), selected = c()),
             dateRangeInput("history_date_range", label = NULL,
                            format = "yyyy-mm-dd", startview = "month", weekstart = 0,
                            language = "en", separator = " to ")
+          ),
+
+          # Plots box
+          box(
+            title = "Parameter history",
+            status = "success", solidHeader = TRUE, width = 12,
+            plotDownloadLink(id = "history_plot_download"),
+            tabsetPanel(
+              id = "history_plot_tabs", selected = "i",
+              tabPanel("Interactive Plot", value = "i",
+                       plotlyOutput("history_iplot", height="500px", width = "100%")),
+              tabPanel("Static Plot", value = "gg",
+                       plotOutput("history_plot", height="500px", width = "100%"))
+            )
           )
         ),
+
+
         tabPanel("Full scan History", value = "full_scans",
                  h1("temp")),
         tabPanel("Peak shape History", value = "peak_shapes",

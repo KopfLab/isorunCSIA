@@ -28,15 +28,26 @@ HISTORY_FILES <- c(
   "sensitivity" = "instrument_sensitivity_history.csv",
   "parameters" = "instrument_parameters_history.csv"
 )
+FULL_SCAN_FOLDER <- file.path(INSTRUMENT_HISTORY_FOLDER, "full_scans")
+PEAK_SHAPE_FOLDER <- file.path(INSTRUMENT_HISTORY_FOLDER, "peak_shapes")
 ELEMENTS <- c("carbon", "hydrogen", "nitrogen")
 
 # make sure base directory is set
 if (!exists(".base_dir", env = .GlobalEnv))
   .GlobalEnv$.base_dir <- file.path(getwd(), "data")
 
+# make sure folders exist
+if (!file.exists(.base_dir))
+  dir.create(.base_dir)
+if (!file.exists(file.path(.base_dir, INSTRUMENT_HISTORY_FOLDER)))
+  dir.create(file.path(.base_dir, INSTRUMENT_HISTORY_FOLDER))
+if (!file.exists(file.path(.base_dir, FULL_SCAN_FOLDER)))
+  dir.create(file.path(.base_dir, FULL_SCAN_FOLDER))
+if (!file.exists(file.path(.base_dir, PEAK_SHAPE_FOLDER)))
+  dir.create(file.path(.base_dir, PEAK_SHAPE_FOLDER))
+
 # copy default settings if needed
 .settings_file <- file.path(.GlobalEnv$.base_dir, SETTINGS_FILE)
-
 if (!file.exists(.settings_file)) {
   message("INFO: No settings file exists in this workspace yet. Copying default settings file.")
   .default_settings_file <- system.file("gui", "default_settings.xlsx", package = "isorunCSIA")
