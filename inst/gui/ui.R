@@ -47,31 +47,37 @@ ui <- dashboardPage(
     tabItem(
       tabName = "instrument",
       tabsetPanel(
-        id = "instrument_tabs", selected = "params",
-        tabPanel("New", value = "new",
+        id = "instrument_tabs", selected = "new",
+        tabPanel(
+          "New", value = "new",
 
-                 h4(actionLink("instrument_new_clear", "Clear all", icon = icon("rotate-left"))),
+          p(h4(actionLink("instrument_new_clear", "Clear all", icon = icon("rotate-left")))),
 
-                 h2("Background"),
-                 historyInfoInput(id = "background"),
-                 fileInput('full_scan_file', 'Choose Full Scan',
-                           accept=c('.scn')),
-                 historyArchiveButton(id = "background"),
+          box(title = "Background", collapsible = TRUE, solidHeader = TRUE, width = 12, status = "warning", # FIXME: change color with save status!
+              historyInfoInput(id = "background"),
+              modalFileSelectorInput(id = "full_scan_files", label = "Select full scan file", link_wrapper = h4, allow_upload = FALSE),
+              h5(textOutput("full_scan_file")),
+              historyArchiveButton(id = "background")
+          ),
 
-                 h2("Sensitivity"),
-                 historyInfoInput(id = "sensitivity"),
-                 historyArchiveButton(id = "sensitivity"),
-                 h4("Peak shape"),
+          box(title = "Sensitivity & Peak shape", collapsible = TRUE, solidHeader = TRUE, width = 12, status = "warning",
+              historyInfoInput(id = "sensitivity"),
+              modalFileSelectorInput(id = "peak_shape_files", label = "Select peak shape file", link_wrapper = h4, allow_upload = FALSE),
+              h5(textOutput("peak_shape_file")),
+              historyArchiveButton(id = "sensitivity")
+          ),
 
-                 h2("Instrument parameters"),
-                 historyInfoInput(id = "parameters"),
-                 historyArchiveButton(id = "parameters"),
+          box(title = "Instrument parameters", collapsible = TRUE, solidHeader = TRUE, width = 12, status = "warning",
+              historyInfoInput(id = "parameters"),
+              historyArchiveButton(id = "parameters")
+          ),
 
-                 h2("Isotopic stability"),
-                 h4("ON/OFFs"),
-                 h4("Linearity")
+          box(title = "Isotopic stability", collapsible = TRUE, solidHeader = TRUE, width = 12, status = "warning",
+            h4("ON/OFFs"),
+            h4("Linearity")
+          )
 
-                 ),
+        ),
 
         # PARAMETER HISTORY ----
         tabPanel(
@@ -131,12 +137,7 @@ ui <- dashboardPage(
     # TUNING: File selection ----
     tabItem(
       tabName = "tuning_files",
-      column(
-        width = 12,
-        fileSelectorInput(
-          id = "tuning_files_local", allow_upload = TRUE,
-          upload_label = 'Upload tuning files (individual or .zip archives)')) %>%
-        fluidRow(),
+
 
       # TUNING: File preview box ----
       box(

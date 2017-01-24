@@ -18,39 +18,83 @@ server <- shinyServer(function(input, output, session) {
   # SETTINGS =======
   settings <- read_excel(file.path(data_dir, SETTINGS_FILE), sheet = "global")
   parameters <- read_excel(file.path(data_dir, SETTINGS_FILE), sheet = "parameters")
-
-  # REACTIVE VALUES ----
-  values <- reactiveValues(
-    tuning_file_preview = NULL,
-    history_variables = c()
-  )
-
-  # INSTRUMENT NEW PARAMETER RECORD ----
   history_files <- expand.grid(Element = ELEMENTS, Category = names(HISTORY_FILES)) %>%
     mutate(
       filename = HISTORY_FILES[Category],
       filepath = file.path(data_dir, INSTRUMENT_HISTORY_FOLDER, paste0(Element, "_", filename))
     )
+
+  # REACTIVE VALUES ----
+  values <- reactiveValues(
+    tuning_file_preview = NULL,
+    full_scan_file = NULL,
+    peak_shape_file = NULL,
+    history_variables = c()
+  )
+
+  # INSTRUMENT NEW PARAMETER RECORD ----
+  observe({ input$instrument_new_clear; values$full_scan_file <- NULL; values$peak_shape_file <- NULL }) # reset
+  ### BACKGROUND
   background_table <- callModule(
     historyInfoTable, "background", parameters = parameters, history_files = history_files,
     element_input = reactive(input$element), clear_input = reactive(input$instrument_new_clear))
+  full_scan_files <- callModule(fileSelector, "full_scan_files", pattern = "\\.scn$",
+                                root = data_dir, root_name = "Data", size = 12, multiple = FALSE)
   observe({
-    scn_file <- input$full_scan_file
+    validate(need(full_scan_files$selection(), message = FALSE) %then%
+               need(length(full_scan_files$selection() == 1), message = FALSE) %then%
+               need(grepl("\\.scn$", basename(full_scan_files$selection())), message = FALSE))
+    isolate(values$full_scan_file <- full_scan_files$selection())
+  })
+  output$full_scan_file <- renderText({
+    if (is.null(values$full_scan_file)) "No file selected"
+    else sub(data_dir, "", values$full_scan_file, fixed = TRUE)
+  })
+  observe({ # save full scan file
+    background_table$archive()
+    scn_file <- isolate(values$full_scan_file)
+    message("Saving full scan file ", scn_file)
     if (!is.null(scn_file)) {
-      file.copy(from = scn_file$datapath,
+      file.copy(from = scn_file,
                 to = file.path(data_dir, FULL_SCAN_FOLDER, paste0(Sys.time() %>% format("%Y%m%d_%H%M%S"), "_full_scan.scn")))
     }
+    isolate(values$full_scan_file <- NULL)
   })
 
+  ### SENSITVITY & PEAK SHAPE
   sensitivity_table <- callModule(
     historyInfoTable, "sensitivity", parameters = parameters, history_files = history_files,
     element_input = reactive(input$element), clear_input = reactive(input$instrument_new_clear))
+  peak_shape_files <- callModule(fileSelector, "peak_shape_files", pattern = "\\.scn$",
+                                root = data_dir, root_name = "Data", size = 12, multiple = FALSE)
+  observe({
+    validate(need(peak_shape_files$selection(), message = FALSE) %then%
+               need(length(peak_shape_files$selection() == 1), message = FALSE) %then%
+               need(grepl("\\.scn$", basename(peak_shape_files$selection())), message = FALSE))
+    isolate(values$peak_shape_file <- peak_shape_files$selection())
+  })
+  output$peak_shape_file <- renderText({
+    if (is.null(values$peak_shape_file)) "No file selected"
+    else sub(data_dir, "", values$peak_shape_file, fixed = TRUE)
+  })
+  observe({ # save peak shape file
+    sensitivity_table$archive()
+    scn_file <- isolate(values$peak_shape_file)
+    message("Saving peak shape file ", scn_file)
+    if (!is.null(scn_file)) {
+      file.copy(from = scn_file,
+                to = file.path(data_dir, PEAK_SHAPE_FOLDER, paste0(Sys.time() %>% format("%Y%m%d_%H%M%S"), "_peak_shape.scn")))
+    }
+    isolate(values$peak_shape_file <- NULL)
+  })
 
+  ### INSTRUMENT PARAMETERS
   instrument_table <- callModule(
     historyInfoTable, "parameters", parameters = parameters, history_files = history_files,
     element_input = reactive(input$element), clear_input = reactive(input$instrument_new_clear))
 
-  # INSTRUMENT PARAMETER HISTORY ----
+
+  # PARAMETER HISTORY ----
   get_history_data <- reactivePoll(3000, session,
     # checks every second whether any of the history files were modified
     checkFunc = function() {
@@ -65,7 +109,7 @@ server <- shinyServer(function(input, output, session) {
         do({
           if (file.exists(.$filepath[1])) {
             read.csv(.$filepath[1], header = TRUE, stringsAsFactors = FALSE,
-                     row.names = NULL, colClasses = c(timestamp = "POSIXct")) %>%
+                     row.names = NULL, colClasses = c(timestamp = "POSIXct", Notes = "character")) %>%
               gather(Column, value, -timestamp, -Notes)
           } else {
             data_frame()
@@ -132,123 +176,9 @@ server <- shinyServer(function(input, output, session) {
 
   output$history_plot <- renderPlot(get_history_plot() + theme(text = element_text(size = 24)))
   output$history_iplot <- renderPlotly(ggplotly(get_history_plot() + theme(text = element_text(size = 16))))
-  default_history_plot_name <- reactive(paste0(Sys.time() %>% format("%Y%m%d_"),
-                                               paste(input$history_variables, collapse = "_"),
-                                               "_history.pdf"))
+  # note: dynamic ticks does not work because of date axis
+  default_history_plot_name <-
+    reactive(paste0(Sys.time() %>% format("%Y%m%d_"), paste(input$history_variables, collapse = "_"), "_history.pdf"))
   callModule(plotDownloadDialog, "history_plot_download", get_history_plot, default_history_plot_name)
-
-  # TUNING: File selection ----
-  tuning_files <- callModule(fileSelector, "tuning_files_local", pattern = "\\.(scn|bff)$",
-                             root = data_dir, root_name = "Available", size = 8)
-  data_files <- callModule(fileSelector, "data_files_local", pattern = "\\.did$",
-                           root = data_dir, root_name = "Available", size = 8)
-
-
-
-
-  # TUNING ----
-
-
-
-
-  # TUNING: File quick view plot ----
-  get_tuning_file_plot <- reactive({
-    view_file <- tuning_files$double_click()
-    validate(
-      need(view_file, message = "No file selected (double click scan file to load).") %then%
-        need(!dir.exists(view_file), message = FALSE) %then%
-        need(file.exists(view_file), message = "File does not exists") %then%
-        need(grepl("\\.(scn|bff)$", view_file),
-             message = sprintf("Cannot preview file %s. Supported file types are '.scn' and '.bff'.",
-                               basename(view_file)))
-    )
-
-    scans <- load_scans(view_file)
-    message("Generating tuning file plot for ", view_file)
-    make_ggplot(scans[[1]])
-  })
-
-  # render and download
-  output$tuning_file_plot <- renderPlot(get_tuning_file_plot())
-  output$tuning_file_iplot <- renderPlotly({
-    get_tuning_file_plot()
-    scans <- load_scans(tuning_files$double_click(), quiet = T)
-    message("Converting to interactive plot")
-    make_iplot(scans[[1]])
-  })
-  default_tuning_filename <- reactive(sub("\\.[^.]+", ".pdf", basename(tuning_files$double_click())))
-  callModule(plotDownloadDialog, "tuning_file_download", get_tuning_file_plot, default_tuning_filename)
-
-  # TUNING: File plot code preview ----
-  observe({
-    view_file <- tuning_files$double_click()
-    if (is.null(view_file) || view_file == "") code <- "```{r}\n# No file selected\n```"
-    else {
-      code <-
-        paste0(
-          "```{r}\n",
-          "# Load library\nlibrary(dpos)\n\n",
-          "# Code for plot generation\n",
-          "scans <- load_scans(file.path(\"path\", \"to\", \"%s\"))\n",
-          "scan <- scans[[1]]\n",
-          "make_%splot(scan)\n",
-          "```") %>%
-        sprintf(basename(view_file), input$tuning_file_plot_tabs)
-    }
-
-    updateAceEditor(session, "tuning_plot_code", value = code)
-  })
-
-
-  # DATA ----
-
-  # DATA: File selection ----
-
-
-  # DATA: File quick view plot ----
-  get_data_file_plot <- reactive({
-    view_file <- data_files$double_click()
-    validate(
-      need(view_file, message = "No file selected (double click data file to load).") %then%
-        need(!dir.exists(view_file), message = FALSE) %then%
-        need(file.exists(view_file), message = "File does not exists") %then%
-        need(grepl("\\.did$", view_file),
-             message = sprintf("Cannot preview file %s. Supported file types are '.did'.",
-                               basename(view_file)))
-    )
-
-    data <- load_isodat_data(view_file)
-    message("Generating data file plot for ", view_file)
-    make_ggplot(data)
-  })
-
-  # render and download
-  output$data_file_plot <- renderPlot(get_data_file_plot())
-  output$data_file_iplot <- renderPlotly({
-    get_data_file_plot()
-    data <- load_isodat_data(data_files$double_click(), quiet = T)
-    message("Converting to interactive plot")
-    make_iplot(data)
-  })
-  default_data_filename <- reactive(sub("\\.[^.]+", ".pdf", basename(data_files$double_click())))
-  callModule(plotDownloadDialog, "data_file_download", get_data_file_plot, default_data_filename)
-
-  # DATA: File plot code preview ----
-  observe({
-    view_file <- data_files$double_click()
-    if (is.null(view_file) || view_file == "") code <- "# No file selected"
-    else {
-      code <-
-        paste0(
-          "# Load library\nlibrary(dpos)\n\n",
-          "# Code for plot generation\n",
-          "data <- load_isodat_data(file.path(\"path\", \"to\", \"%s\"))\n",
-          "make_%splot(data)") %>%
-        sprintf(basename(view_file), input$data_file_plot_tabs)
-    }
-
-    updateAceEditor(session, "data_plot_code", value = code)
-  })
-
 
 })

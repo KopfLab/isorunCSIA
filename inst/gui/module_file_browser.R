@@ -34,6 +34,19 @@ fileSelectorInput <- function(id, allow_upload = FALSE, upload_label = NULL) {
   return(dialog_tags)
 }
 
+#' modalFileSelector
+#' @param ... parameters for fileSelectorInput
+modalFileSelectorInput <- function(id, label = "Select file", link_wrapper = identity, ...) {
+  ns <- NS(id)
+  dialog_tags <-
+    tagList(
+      link_wrapper(actionLink(ns("modal_link"), label, icon = icon("file"))),
+      bsModal(ns("modal_dialog"), label, ns("modal_link"), size = "small",
+              column(width = 12, fileSelectorInput(id, ...)) %>% fluidRow()
+      )
+    )
+  return(dialog_tags)
+}
 
 #' @param root directory
 #' @param root_name the root directory name
@@ -42,7 +55,7 @@ fileSelectorInput <- function(id, allow_upload = FALSE, upload_label = NULL) {
 #' @param size number of rows in the selection box
 fileSelector <- function(input, output, session,
                          root, root_name = basename(root),
-                         sort_desc = FALSE, pattern = NULL,
+                         sort_desc = FALSE, pattern = NULL, multiple = TRUE,
                          size = 8) {
 
   # namespace
@@ -167,7 +180,7 @@ fileSelector <- function(input, output, session,
   # generate folder content listing
   output$content_list <- renderUI({
     selectInput(ns("content_list"), NULL, width = "100%",
-                size = size, selectize = F, multiple = T,
+                size = size, selectize = F, multiple = multiple,
                 values$content_list)
   })
 

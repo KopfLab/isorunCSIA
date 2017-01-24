@@ -9,10 +9,10 @@ historyInfoInput <- function(id, caption = id) {
   )
 }
 
-historyArchiveButton <- function(id, caption = id) {
+historyArchiveButton <- function(id, caption = id, wrapper = h4) {
   ns <- NS(id)
   tagList(
-    h4(actionLink(ns("archive"), sprintf("Record %s information", caption), icon = icon("archive")), textOutput(ns("archive_status"), inline=TRUE))
+    wrapper(actionLink(ns("archive"), sprintf("Record %s information", caption), icon = icon("archive")), textOutput(ns("archive_status"), inline=TRUE))
   )
 }
 
@@ -133,6 +133,7 @@ historyInfoTable <- function(input, output, session,
   # return both the current path and the selected folder contents
   list(
     hot = reactive(values$hot),
+    archive = reactive(input$archive),
     saved = reactive(values$saved),
     notes = reactive(input$notes)
   )
