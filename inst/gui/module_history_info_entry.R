@@ -17,9 +17,11 @@ historyArchiveButton <- function(id, caption = id, wrapper = h4) {
 }
 
 #---- SERVER SIDE
+#' @param number_format how to format numbers in the table, see http://numeraljs.com/ for details
 historyInfoTable <- function(input, output, session,
                              parameters, history_files,
-                             element_input, clear_input) {
+                             element_input, clear_input,
+                             number_format = "0") {
 
   # namespace
   ns <- session$ns
@@ -125,7 +127,7 @@ historyInfoTable <- function(input, output, session,
       rhandsontable() %>%
       hot_table(readOnly = TRUE, highlightRow = TRUE, columnSorting = FALSE, contextMenu = FALSE,
                 customBorders = generate_borders(hot[[element_input()]]$Type)) %>%
-      hot_col(col = "Value", readOnly = FALSE, format = "0") %>%
+      hot_col(col = "Value", readOnly = FALSE, format = number_format) %>%
       hot_col(col = "Check", readOnly = FALSE)
   })
 
