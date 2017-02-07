@@ -1,6 +1,6 @@
 Package: isorunCSIA
 Type: Package
-Version: 0.1
+Version: 0.1.2
 Date: 2017-01-15
 Author: Sebastian Kopf
 Maintainer: Sebastian Kopf <sebastian.kopf@colorado.edu>
@@ -11,7 +11,7 @@ BugReports: https://github.com/kopflab/isorunCSIA/issues
 Imports:
     methods,
     R.utils,
-    stringr,
+    Rcpp,
     isoread,
     tidyr,
     dplyr,
@@ -23,12 +23,15 @@ Suggests:
     knitr,
     openxlsx,
     shiny,
+    shinyjs,
     shinyBS,
     shinydashboard,
     shinyAce,
+    dtplyr,
     DT,
     data.table,
-    rhandsontable
+    rhandsontable,
+    devtools
 VignetteBuilder: knitr
 Collate:
     'gui.R'

@@ -8,8 +8,20 @@
 #' @importFrom isoread isoread
 #' @importFrom methods is
 #' @importFrom stats setNames
-#' @importFrom stringr str_match_all
 #'
 #' @include loading.R
 #' @include gui.R
 NULL
+
+
+#' install the version of isorun CSIA from GitHub
+#' @param ref which version to install, master (=newest) is the default
+#' @export
+update_isorunCSIA <- function(ref = "master") {
+  if (is.null(ref) || ref == "") ref <- "master"
+  on.exit({
+    remove.packages("isorunCSIA")
+    devtools::install_github("kopflab/isorunCSIA", ref = ref)
+    message("Installation complete: isorunCSIA version ", packageVersion("isorunCSIA"))
+  })
+}
