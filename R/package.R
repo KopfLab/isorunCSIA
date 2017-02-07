@@ -18,10 +18,9 @@ NULL
 #' @param ref which version to install, master (=newest) is the default
 #' @export
 update_isorunCSIA <- function(ref = "master") {
-  if (is.null(ref) || ref == "") ref <- "master"
   on.exit({
     remove.packages("isorunCSIA")
     devtools::install_github("kopflab/isorunCSIA", ref = ref)
-    message("Installation complete: isorunCSIA version ", packageVersion("isorunCSIA"))
+    message("\nInstallation complete: isorunCSIA version ", packageVersion("isorunCSIA"), "\n\n")
   })
 }
