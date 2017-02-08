@@ -24,7 +24,10 @@ server <- shinyServer(function(input, output, session) {
   values <- reactiveValues(
     full_scan_file = NULL, # last saved full scan file
     peak_shape_file = NULL, # last saved peak shape file
-    history_variables = c()
+    history_variables = c(),
+    data_files_list = c(),
+    data_files_selected = c(),
+    data_files_objects = list()
   )
 
   # INSTRUMENT NEW PARAMETER RECORD ----
@@ -41,5 +44,7 @@ server <- shinyServer(function(input, output, session) {
   # PARAMETER HISTORY
   source("server_parameter_history.R", local = TRUE)
 
+  # DATA
+  source("server_data_viewer.R", local = TRUE)
 
 })

@@ -11,6 +11,7 @@ library(rhandsontable)
 library(dtplyr)
 library(dplyr)
 library(tidyr)
+library(DT)
 `%then%` <- shiny:::`%OR%`
 
 # modules

@@ -14,10 +14,10 @@ ui <- dashboardPage(
   sidebarMenu(
 
     menuItem("Welcome", tabName = "welcome", icon = icon("info")),
-    menuItem("Instrument", tabName = "instrument", icon = icon("cog"), selected = TRUE),
+    menuItem("Instrument", tabName = "instrument", icon = icon("cog")),
     menuItem("Tuning", tabName = "tuning", icon = icon("music")),
     menuItem("Standards", tabName = "standards", icon = icon("check")),
-    menuItem("Data", tabName = "data", icon = icon("bar-chart")),
+    menuItem("Data", tabName = "data", icon = icon("bar-chart"), selected = TRUE),
     menuItem("Settings", tabName = "settings", icon = icon("wrench")),
     radioButtons("mode", label = "Mode", choices = modes$Mode),
     menuItem(
@@ -92,6 +92,7 @@ ui <- dashboardPage(
         tabPanel(
           "Parameter History", value = "params",
           # Parameter selection box
+          br(),
           box(
             title = "Parameter selection", collapsible = TRUE,
             status = "success", solidHeader = TRUE, width = 12,
@@ -141,6 +142,44 @@ ui <- dashboardPage(
 
     # DATA ----
 
+    tabItem(
+      tabName = "data",
+
+      br(),
+      box(
+        title = "Relevant data files", collapsible = TRUE,
+        status = "success", solidHeader = TRUE, width = 12,
+
+        selectInput("data_files_list", label = NULL, multiple = TRUE, size = 8, selectize = FALSE,
+                    choices = c("Specs_break/Acquisition_161219_160916_CO2 zero _.dxf", "Specs_break/Acquisition_161219_161715_CO2 zero _.dxf",
+                                "Specs_break/Acquisition_161219_194845_H2 zero _.dxf"), # debug
+                    selected = c("Specs_break/Acquisition_161219_160916_CO2 zero _.dxf", "Specs_break/Acquisition_161219_161715_CO2 zero _.dxf",
+                                 "Specs_break/Acquisition_161219_194845_H2 zero _.dxf") # debug
+                      ),
+
+        column(4, div(align = "left",
+            modalFileSelectorInput(id = "data_files_select",
+                                   open_label = "Add data files", close_label = "Add",
+                                   link_wrapper = h4, allow_upload = FALSE))),
+        column(8, div(align = "right",
+            h4(
+              actionLink("data_files_remove", "Remove", icon = icon("remove")), " | ",
+              actionLink("data_files_export", "Export", icon = icon("cloud-download")), " |",
+              actionLink("data_files_plot", "Load", icon = icon("bar-chart"))
+            )))
+
+      ),
+
+      box(
+        title = "Data", collapsible = TRUE,
+        status = "info", solidHeader = TRUE, width = 12,
+        DT::dataTableOutput("data_files_data_table")
+      )
+
+    ), # / DATA tabItem
+
+
+
     # SETTINGS ----
 
     # TUNING: File selection ----
@@ -173,44 +212,7 @@ ui <- dashboardPage(
 
     # TUNING: Analysis ----
     tabItem(
-      tabName = "tuning_analyze", h2("hello")),
-
-
-    # DATA ----
-
-    tabItem(
-      tabName = "data",
-      column(
-        width = 12,
-        fileSelectorInput(
-          id = "data_files_local", allow_upload = TRUE,
-          upload_label = 'Upload tuning files (individual or .zip archives)')) %>%
-        fluidRow(),
-
-      # DATA: File preview code ----
-      box(
-        aceEditor("data_plot_code", mode = "r",
-                  theme="ambiance", readOnly = TRUE,
-                  height = "200px"),
-        title = "Code preview",
-        status = "success", solidHeader = TRUE, width = 12),
-
-      # DATA: File preview box ----
-      box(
-        plotDownloadLink(id = "data_file_download"),
-
-        tabsetPanel(id = "data_file_plot_tabs",
-                    tabPanel("Static Plot", value = "gg",
-                             plotOutput("data_file_plot", height="500px", width = "100%")),
-                    tabPanel("Interactive Plot", value = "i",
-                             plotlyOutput("data_file_iplot", height="500px", width = "100%"))
-        ),
-
-        title = "Data file quick view",
-        status = "info", solidHeader = TRUE, width = 12)
-
-
-    ) # / tabItem
+      tabName = "tuning_analyze", h2("hello"))
 
   ) %>% dashboardBody()
 
