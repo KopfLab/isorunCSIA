@@ -123,7 +123,7 @@ historyInfoTable <- function(input, output, session,
 
     # generate handsontable
     hot[[mode_input()]] %>%
-      select(Mode, Caption, Check, Value, Units, Info) %>%
+      select(Caption, Check, Value, Units, Mode, Info) %>%
       rhandsontable() %>%
       hot_table(readOnly = TRUE, highlightRow = TRUE, columnSorting = FALSE, contextMenu = FALSE,
                 customBorders = generate_borders(hot[[mode_input()]]$Type)) %>%

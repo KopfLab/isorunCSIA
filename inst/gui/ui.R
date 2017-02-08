@@ -29,7 +29,8 @@ ui <- dashboardPage(
     tags$head(
       tags$style(HTML(".shiny-output-error-validation { color: red; font-size: 16px; }")),
       tags$style(HTML(".shiny-output-error-info { color: black; font-size: 20px; padding: 20px; }")),
-      tags$style(type = "text/css", ".sidebar {height:1300px}") # FIXME: make this dynamically long enough
+      tags$style(HTML(".sidebar {height:2000px}")), # FIXME: make this dynamically long enough
+      tags$style(HTML(".box-body {padding-top: 15px; padding-bottom: 0px;}"))
     ),
 
 
@@ -53,7 +54,11 @@ ui <- dashboardPage(
         tabPanel(
           "New", value = "new",
 
-          p(h4(actionLink("instrument_new_clear", "Clear all", icon = icon("rotate-left")))),
+          br(),
+          box(title = NULL, collapsible = FALSE, solidHeader = FALSE, width = 12,
+              column(4, div(align = "left", textInput("user", NULL, placeholder = "Please enter your name"))),
+              column(8, div(align = "right", h4(actionLink("instrument_new_clear", "Clear all", icon = icon("rotate-left")))))
+          ),
 
           box(title = "Background", collapsible = TRUE, solidHeader = TRUE, width = 12, status = "warning", # FIXME: change color with save status!
               historyInfoInput(id = "background"),
