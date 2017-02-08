@@ -21,6 +21,6 @@ update_isorunCSIA <- function(ref = "master") {
   on.exit({
     remove.packages("isorunCSIA")
     devtools::install_github("kopflab/isorunCSIA", ref = ref)
-    message("\nInstallation complete: isorunCSIA version ", packageVersion("isorunCSIA"), "\n\n")
+    message("\nInstallation complete: isorunCSIA version ", packageVersion("isorunCSIA"), "\n")
   })
 }
