@@ -1,4 +1,4 @@
-# Ruby guard file
+# Ruby guard file (need ruby >2.2 and bundler installed: 'gem install bundler')
 # To make sure all the gems are installed, run 'bundle install' once in your browser
 # Then you can use the Makefile target 'make gui_dev' to start the GUI in development mode
 # For browser livereload to work, need the browser extension: http://livereload.com/extensions/#installing-sections
