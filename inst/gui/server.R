@@ -17,13 +17,8 @@ server <- shinyServer(function(input, output, session) {
 
   # SETTINGS =======
   #global <- read_excel(file.path(data_dir, SETTINGS_FILE), sheet = "global")
-  parameters <- read_excel(file.path(data_dir, SETTINGS_FILE), sheet = "parameters")
   modes <- read_excel(file.path(data_dir, SETTINGS_FILE), sheet = "modes")
-  history_files <- expand.grid(Element = ELEMENTS, Category = names(HISTORY_FILES)) %>%
-    mutate(
-      filename = HISTORY_FILES[Category],
-      filepath = file.path(data_dir, INSTRUMENT_HISTORY_FOLDER, paste0(Element, "_", filename))
-    )
+  parameters <- read_excel(file.path(data_dir, SETTINGS_FILE), sheet = "parameters")
 
   # REACTIVE VALUES ----
   values <- reactiveValues(
@@ -33,7 +28,12 @@ server <- shinyServer(function(input, output, session) {
   )
 
   # INSTRUMENT NEW PARAMETER RECORD ----
-  observe({ input$instrument_new_clear; values$full_scan_file <- NULL; values$peak_shape_file <- NULL }) # reset
+  observe({ # reset
+    input$instrument_new_clear
+    values$full_scan_file <- NULL
+    values$peak_shape_file <- NULL
+    updateTextInput(session, "user", value = "")
+  })
   source("server_background.R", local = TRUE)
   source("server_sensitivity.R", local = TRUE)
   source("server_instrument_parameters.R", local = TRUE)

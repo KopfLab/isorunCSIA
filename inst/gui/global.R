@@ -19,22 +19,21 @@ source("module_ggplot_download.R")
 source("module_history_info_entry.R")
 source("utils.R")
 
+# make sure base directory is set
+if (!exists(".base_dir", env = .GlobalEnv))
+  .GlobalEnv$.base_dir <- file.path(getwd(), "data")
+
 # fixed settings
 SIDEBAR_WIDTH <- 150 #px
 SETTINGS_FILE <- "isorunCSIA_settings.xlsx"
 INSTRUMENT_HISTORY_FOLDER <- "instrument_history"
 HISTORY_FILES <- c(
-  "background" = "instrument_background_history.csv",
-  "sensitivity" = "instrument_sensitivity_history.csv",
-  "parameters" = "instrument_parameters_history.csv"
+  "background" = file.path(.base_dir, INSTRUMENT_HISTORY_FOLDER, "instrument_background_history.csv"),
+  "sensitivity" = file.path(.base_dir, INSTRUMENT_HISTORY_FOLDER, "instrument_sensitivity_history.csv"),
+  "parameters" = file.path(.base_dir, INSTRUMENT_HISTORY_FOLDER, "instrument_parameters_history.csv")
 )
 FULL_SCAN_FOLDER <- file.path(INSTRUMENT_HISTORY_FOLDER, "full_scans")
 PEAK_SHAPE_FOLDER <- file.path(INSTRUMENT_HISTORY_FOLDER, "peak_shapes")
-ELEMENTS <- c("carbon", "hydrogen", "nitrogen")
-
-# make sure base directory is set
-if (!exists(".base_dir", env = .GlobalEnv))
-  .GlobalEnv$.base_dir <- file.path(getwd(), "data")
 
 # make sure folders exist
 if (!file.exists(.base_dir))

@@ -1,5 +1,5 @@
 # settings
-modes <- read_excel(file.path(.GlobalEnv$.base_dir, SETTINGS_FILE), sheet = "modes")
+modes <- read_excel(.settings_file, sheet = "modes")
 
 # Define UI that plots the isotope label enrichment
 ui <- dashboardPage(

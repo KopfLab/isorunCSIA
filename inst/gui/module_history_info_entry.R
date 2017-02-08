@@ -19,18 +19,18 @@ historyArchiveButton <- function(id, caption = id, wrapper = h4) {
 #---- SERVER SIDE
 #' @param number_format how to format numbers in the table, see http://numeraljs.com/ for details
 historyInfoTable <- function(input, output, session,
-                             parameters, history_files,
-                             mode_input, clear_input,
+                             modes, parameters,
+                             mode_input, user_input, clear_input,
                              number_format = "0") {
 
   # namespace
   ns <- session$ns
 
   # element parameters
-  element_parameters <- list()
-  for (element in ELEMENTS) {
-    element_parameters[[element]] <- parameters %>%
-      filter(Category == ns(NULL), Element == "all" | grepl(element, Element, fixed=TRUE)) %>%
+  mode_parameters <- list()
+  for (mode in modes$Mode) {
+    mode_parameters[[mode]] <- parameters %>%
+      filter(Category == ns(NULL), Mode == "all" | grepl(mode, Mode, fixed=TRUE)) %>%
       mutate(Check = FALSE, Value = NA_real_)
   }
 
@@ -47,9 +47,9 @@ historyInfoTable <- function(input, output, session,
 
     # values
     values$hot <- list()
-    values$saved <- rep(FALSE, length(ELEMENTS)) %>% setNames(ELEMENTS)
-    for (element in ELEMENTS) {
-      isolate(values$hot[[element]] <- element_parameters[[element]])
+    values$saved <- rep(FALSE, nrow(modes)) %>% setNames(modes$Mode)
+    for (mode in modes$Mode) {
+      isolate(values$hot[[mode]] <- mode_parameters[[mode]])
     }
     updateTextAreaInput(session, "notes", value = "")
   })
@@ -57,37 +57,69 @@ historyInfoTable <- function(input, output, session,
   # archive data
   observe({
     validate(need(input$archive, message = FALSE))
-    isolate(values$saved[mode_input()] <- TRUE)
+    isolate(values$saved[mode_input()] <- TRUE) # store information the this mode was saved
+
+    # find data
     data <- isolate({
       bind_cols(
-        # add timestamp
-        data_frame(timestamp = Sys.time() %>% format()),
-        # settings
+        # add user, mode, timestamp and notes
+        data_frame(
+          timestamp = format(Sys.time()),
+          user = user_input(),
+          mode = mode_input(),
+          notes = input$notes
+        ),
+        # add the settings
         values$hot[[mode_input()]] %>%
-          left_join(select(element_parameters[[mode_input()]], Column, Caption, Type), by = "Caption") %>%
+          left_join(select(mode_parameters[[mode_input()]], Column, Caption, Type), by = "Caption") %>%
           mutate(save_value = ifelse(Type == "bool", as.numeric(Check), Value)) %>%
-          select(Column, save_value) %>% spread(Column, save_value),
-        # notes
-        data_frame(Notes = input$notes))
+          select(Column, save_value) %>% spread(Column, save_value)
+        )
     })
 
-    # check for consistency with previous history files
-    ele_history_file <- filter(history_files, Element == isolate(mode_input()), Category == ns(NULL))$filepath[1]
-    if (length(ele_history_file) == 0) stop("can't find history file for this element and parameter category")
-    message("INFO: saving '", ns(NULL), "' parameters for ", isolate(mode_input()), " in ", ele_history_file)
-    if (file.exists(ele_history_file)) {
-      check_headers <- read.csv(file = ele_history_file, header = TRUE, nrows = 1, stringsAsFactors = FALSE)
-      if (ncol(check_headers) != ncol(data) || !all(names(check_headers) == names(data))) {
-        old_data <- read.csv(file = ele_history_file, header = TRUE, stringsAsFactors = FALSE)
-        old_ele_history_file <- sub("\\.csv", paste0("_deprecated_", Sys.time() %>% format("%Y%m%d_%H%M%S"), ".csv"), ele_history_file)
-        message("WARNING: headers in history file don't match new data set --> deprecating history file to ", basename(old_ele_history_file))
-        file.rename(ele_history_file, old_ele_history_file)
-        write.table(data, file = ele_history_file, row.names = FALSE, sep = ",", col.names = TRUE)
-      } else {
-        write.table(data, file = ele_history_file, row.names = FALSE, sep = ",", append = TRUE, col.names = FALSE)
-      }
+    # add the other fields for this history type (that are not included in the mode)
+    missing_cols <- parameters %>% filter(Category == ns(NULL), !Column %in% names(data))
+    if (nrow(missing_cols) > 0) {
+      data <- bind_cols(
+        data,
+        missing_cols %>% select(Column) %>% distinct() %>% mutate(value = NA_real_) %>% spread(Column, value)
+      )
+    }
+
+    # arrange as listed in setup
+    data <- data[c("timestamp", "user", "mode", unique(filter(parameters, Category == ns(NULL))$Column), "notes")]
+
+    # save
+    history_file <- HISTORY_FILES[ns(NULL)]
+    message("INFO: saving '", ns(NULL), "' parameters in ", history_file)
+
+    if (!file.exists(history_file)) {
+      # new file
+      write.table(data, file = history_file, row.names = FALSE, sep = ",", col.names = TRUE)
     } else {
-      write.table(data, file = ele_history_file, row.names = FALSE, sep = ",", col.names = TRUE)
+      # existing file, make sure headers are compatible
+      check_headers <- read.csv(file = history_file, header = TRUE, nrows = 1, stringsAsFactors = FALSE)
+      if (!identical(names(data), names(check_headers))) {
+        # header mismatch - merge files (discard old file information no longer in the history files)
+        old_history_file <- sub("\\.csv", paste0("_backup_", Sys.time() %>% format("%Y%m%d_%H%M%S"), ".csv"), history_file)
+        message("WARNING: header mismatch with existing file (missing: ",
+                paste(setdiff(names(data), names(check_headers)), collapse = ", "),
+                "; extra: ", paste(setdiff(names(check_headers), names(data)), collapse = ", "),
+                ") - merging information and creating backup history file at ", basename(old_history_file))
+
+        # make backup copy
+        file.copy(history_file, old_history_file)
+
+        # save combined data
+        combined_data <- bind_rows(
+          data,
+          read.csv(file = history_file, header = TRUE, stringsAsFactors = FALSE)
+        ) %>% arrange(timestamp)
+        write.table(combined_data[names(data)], file = history_file, row.names = FALSE, sep = ",", col.names = TRUE)
+      } else {
+        # append to existing file
+        write.table(data, file = history_file, row.names = FALSE, sep = ",", append = TRUE, col.names = FALSE)
+      }
     }
 
   })
