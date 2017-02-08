@@ -34,78 +34,9 @@ server <- shinyServer(function(input, output, session) {
 
   # INSTRUMENT NEW PARAMETER RECORD ----
   observe({ input$instrument_new_clear; values$full_scan_file <- NULL; values$peak_shape_file <- NULL }) # reset
-  ### BACKGROUND
-  background_table <- callModule(
-    historyInfoTable, "background", parameters = parameters, history_files = history_files,
-    element_input = reactive(input$element), clear_input = reactive(input$instrument_new_clear))
-  full_scan_files <- callModule(fileSelector, "full_scan_files", pattern = "\\.scn$",
-                                root = data_dir, root_name = "All", size = 12, multiple = FALSE,
-                                number_recent = 10, exclude_recent = INSTRUMENT_HISTORY_FOLDER)
-
-
-  # store full scan file name when modal is closed
-  observe({
-    full_scan_files$modal_closed()
-    isolate({
-      file <- full_scan_files$selection_relative()
-      values$full_scan_file <- if ( length(file) > 0 && grepl("\\.scn$",file)) file else NULL
-    })
-  })
-  # show full scan file name
-  output$full_scan_file <- renderText({
-    if (is.null(values$full_scan_file)) "No file selected"
-    else sub(data_dir, "", values$full_scan_file, fixed = TRUE)
-  })
-  # save full scan file
-  observe({
-    background_table$archive()
-    scn_file <- isolate(values$full_scan_file)
-    if (!is.null(scn_file)) {
-      message("Saving full scan file ", scn_file)
-      file.copy(from = file.path(data_dir, scn_file),
-                to = file.path(data_dir, FULL_SCAN_FOLDER, sprintf("%s_full_scan.scn", format(Sys.time(), "%Y%m%d_%H%M%S"))))
-    }
-    isolate(values$full_scan_file <- NULL)
-  })
-
-  ### SENSITVITY & PEAK SHAPE
-  sensitivity_table <- callModule(
-    historyInfoTable, "sensitivity", parameters = parameters, history_files = history_files,
-    element_input = reactive(input$element), clear_input = reactive(input$instrument_new_clear))
-  peak_shape_files <- callModule(fileSelector, "peak_shape_files", pattern = "\\.scn$",
-                                root = data_dir, root_name = "All", size = 12, multiple = FALSE,
-                                number_recent = 10, exclude_recent = INSTRUMENT_HISTORY_FOLDER)
-
-  # store peak shape file name when modal is closed
-  observe({
-    peak_shape_files$modal_closed()
-    isolate({
-      file <- peak_shape_files$selection_relative()
-      values$peak_shape_file <- if ( length(file) > 0 && grepl("\\.scn$",file)) file else NULL
-    })
-  })
-  # show peak shape file name
-  output$peak_shape_file <- renderText({
-    if (is.null(values$peak_shape_file)) "No file selected"
-    else sub(data_dir, "", values$peak_shape_file, fixed = TRUE)
-  })
-  # save peak shape file
-  observe({
-    sensitivity_table$archive()
-    scn_file <- isolate(values$peak_shape_file)
-    if (!is.null(scn_file)) {
-      message("Saving peak shape file ", scn_file)
-      file.copy(from = file.path(data_dir, scn_file),
-                to = file.path(data_dir, PEAK_SHAPE_FOLDER, sprintf("%s_%s_peak_shape.scn", format(Sys.time(), "%Y%m%d_%H%M%S"), isolate(input$element))))
-    }
-    isolate(values$peak_shape_file <- NULL)
-  })
-
-  ### INSTRUMENT PARAMETERS
-  instrument_table <- callModule(
-    historyInfoTable, "parameters", parameters = parameters, history_files = history_files,
-    element_input = reactive(input$element), clear_input = reactive(input$instrument_new_clear),
-    number_format = "0.000")
+  source("server_background.R", local = TRUE)
+  source("server_sensitivity.R", local = TRUE)
+  source("server_instrument_parameters.R", local = TRUE)
 
 
   # PARAMETER HISTORY ----

@@ -55,16 +55,16 @@ ui <- dashboardPage(
 
           box(title = "Background", collapsible = TRUE, solidHeader = TRUE, width = 12, status = "warning", # FIXME: change color with save status!
               historyInfoInput(id = "background"),
-              modalFileSelectorInput(id = "full_scan_files", open_label = "Select full scan file", link_wrapper = h4, allow_upload = FALSE),
-              h5(textOutput("full_scan_file")),
-              historyArchiveButton(id = "background")
+              historyArchiveButton(id = "background"),
+              modalFileSelectorInput(id = "full_scan_files", open_label = "Save full scan file", link_wrapper = h4, allow_upload = FALSE),
+              h5(textOutput("full_scan_file"))
           ),
 
           box(title = "Sensitivity & Peak shape", collapsible = TRUE, solidHeader = TRUE, width = 12, status = "warning",
               historyInfoInput(id = "sensitivity"),
-              modalFileSelectorInput(id = "peak_shape_files", open_label = "Select peak shape file", link_wrapper = h4, allow_upload = FALSE),
-              h5(textOutput("peak_shape_file")),
-              historyArchiveButton(id = "sensitivity")
+              historyArchiveButton(id = "sensitivity"),
+              modalFileSelectorInput(id = "peak_shape_files", open_label = "Save peak shape file", link_wrapper = h4, allow_upload = FALSE),
+              h5(textOutput("peak_shape_file"))
           ),
 
           box(title = "Instrument parameters", collapsible = TRUE, solidHeader = TRUE, width = 12, status = "warning",
