@@ -105,7 +105,7 @@ historyInfoTable <- function(input, output, session,
   # store hot data in reactive values
   observe({
     validate(need(input$hot, message = "no parameters"))
-    isolate(values$hot[[element_input()]] <- hot_to_r(input$hot))
+   isolate(values$hot[[element_input()]] <-  suppressWarnings(hot_to_r(input$hot)))
   })
 
   # render handsontable
