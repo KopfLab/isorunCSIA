@@ -39,7 +39,7 @@ server <- shinyServer(function(input, output, session) {
   source("server_instrument_parameters.R", local = TRUE)
 
   # PARAMETER HISTORY
-  #source("server_parameter_history.R", local = TRUE)
+  source("server_parameter_history.R", local = TRUE)
 
 
 })

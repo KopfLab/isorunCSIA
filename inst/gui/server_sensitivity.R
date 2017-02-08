@@ -22,5 +22,5 @@ observe({
 # show peak shape file name
 output$peak_shape_file <- renderText({
   if (is.null(values$peak_shape_file)) ""
-  else sprintf("Saved %s at %s", values$peak_shape_file, format(Sys.time()))
+  else sprintf("(saved %s at %s)", values$peak_shape_file, format(Sys.time(), "%H:%M:%S on %d %b %Y"))
 })

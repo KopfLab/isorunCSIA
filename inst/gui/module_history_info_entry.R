@@ -129,7 +129,7 @@ historyInfoTable <- function(input, output, session,
     validate(need(!is.null(values$saved), message = "no saved information"),
              need(!is.null(values$saved[mode_input()]), message = "no element-specific data saved"))
     if (values$saved[mode_input()])
-      return(Sys.time() %>% format(" (saved at %H:%m:%S on %d %b %Y)"))
+      return(Sys.time() %>% format(" (saved at %H:%M:%S on %d %b %Y)"))
     else
       return("")
   })

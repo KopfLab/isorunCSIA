@@ -23,5 +23,5 @@ observe({
 # show full scan file name
 output$full_scan_file <- renderText({
   if (is.null(values$full_scan_file)) ""
-  else sprintf("Saved %s at %s", values$full_scan_file, format(Sys.time()))
+  else sprintf("(saved %s at %s)", values$full_scan_file, format(Sys.time(), "%H:%M:%S on %d %b %Y"))
 })
