@@ -16,8 +16,9 @@ server <- shinyServer(function(input, output, session) {
           "\nINFO: History folder: ", file.path(data_dir, INSTRUMENT_HISTORY_FOLDER))
 
   # SETTINGS =======
-  settings <- read_excel(file.path(data_dir, SETTINGS_FILE), sheet = "global")
+  #global <- read_excel(file.path(data_dir, SETTINGS_FILE), sheet = "global")
   parameters <- read_excel(file.path(data_dir, SETTINGS_FILE), sheet = "parameters")
+  modes <- read_excel(file.path(data_dir, SETTINGS_FILE), sheet = "modes")
   history_files <- expand.grid(Element = ELEMENTS, Category = names(HISTORY_FILES)) %>%
     mutate(
       filename = HISTORY_FILES[Category],

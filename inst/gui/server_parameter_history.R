@@ -39,7 +39,7 @@ observe({
   validate(need(get_history_data(), message = FALSE))
   history_vars <- get_history_data() %>%
     filter(Type == "numeric") %>%  # only numerics
-    filter(Element %in% input$history_element) %>%
+    filter(Element %in% input$history_mode) %>%
     filter(Category %in% input$history_category) %>%
     mutate(Label = paste0(Caption, " [", Units, "]: ", Element_def, "")) %>%
     select(Column, Label) %>%

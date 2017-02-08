@@ -1,3 +1,5 @@
+# settings
+modes <- read_excel(file.path(.GlobalEnv$.base_dir, SETTINGS_FILE), sheet = "modes")
 
 # Define UI that plots the isotope label enrichment
 ui <- dashboardPage(
@@ -17,7 +19,7 @@ ui <- dashboardPage(
     menuItem("Standards", tabName = "standards", icon = icon("check")),
     menuItem("Data", tabName = "data", icon = icon("bar-chart")),
     menuItem("Settings", tabName = "settings", icon = icon("wrench")),
-    radioButtons("element", label = "Element", choices = ELEMENTS),
+    radioButtons("mode", label = "Mode", choices = modes$Mode),
     menuItem(
       "Tuning", tabName = "tunings", icon = icon("music"),
       menuSubItem("Select files", tabName = "tuning_files", icon = icon("files-o")),
@@ -88,9 +90,9 @@ ui <- dashboardPage(
             status = "success", solidHeader = TRUE, width = 12,
             fluidRow(
               column(width = 6,
-                     selectInput("history_element", label = NULL, multiple = TRUE,
-                                 choices = ELEMENTS, selected = ELEMENTS),
-                     bsTooltip("history_element", "Which elements to consider", placement = "top", trigger = "hover")
+                     selectInput("history_mode", label = NULL, multiple = TRUE,
+                                 choices = modes$Mode, selected = modes$Mode),
+                     bsTooltip("history_mode", "Which modes to consider", placement = "top", trigger = "hover")
               ),
               column(width = 6,
                      selectInput("history_category", label = NULL, multiple = TRUE,

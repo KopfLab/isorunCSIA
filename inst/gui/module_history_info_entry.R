@@ -20,7 +20,7 @@ historyArchiveButton <- function(id, caption = id, wrapper = h4) {
 #' @param number_format how to format numbers in the table, see http://numeraljs.com/ for details
 historyInfoTable <- function(input, output, session,
                              parameters, history_files,
-                             element_input, clear_input,
+                             mode_input, clear_input,
                              number_format = "0") {
 
   # namespace
@@ -57,14 +57,14 @@ historyInfoTable <- function(input, output, session,
   # archive data
   observe({
     validate(need(input$archive, message = FALSE))
-    isolate(values$saved[element_input()] <- TRUE)
+    isolate(values$saved[mode_input()] <- TRUE)
     data <- isolate({
       bind_cols(
         # add timestamp
         data_frame(timestamp = Sys.time() %>% format()),
         # settings
-        values$hot[[element_input()]] %>%
-          left_join(select(element_parameters[[element_input()]], Column, Caption, Type), by = "Caption") %>%
+        values$hot[[mode_input()]] %>%
+          left_join(select(element_parameters[[mode_input()]], Column, Caption, Type), by = "Caption") %>%
           mutate(save_value = ifelse(Type == "bool", as.numeric(Check), Value)) %>%
           select(Column, save_value) %>% spread(Column, save_value),
         # notes
@@ -72,9 +72,9 @@ historyInfoTable <- function(input, output, session,
     })
 
     # check for consistency with previous history files
-    ele_history_file <- filter(history_files, Element == isolate(element_input()), Category == ns(NULL))$filepath[1]
+    ele_history_file <- filter(history_files, Element == isolate(mode_input()), Category == ns(NULL))$filepath[1]
     if (length(ele_history_file) == 0) stop("can't find history file for this element and parameter category")
-    message("INFO: saving '", ns(NULL), "' parameters for ", isolate(element_input()), " in ", ele_history_file)
+    message("INFO: saving '", ns(NULL), "' parameters for ", isolate(mode_input()), " in ", ele_history_file)
     if (file.exists(ele_history_file)) {
       check_headers <- read.csv(file = ele_history_file, header = TRUE, nrows = 1, stringsAsFactors = FALSE)
       if (ncol(check_headers) != ncol(data) || !all(names(check_headers) == names(data))) {
@@ -95,8 +95,8 @@ historyInfoTable <- function(input, output, session,
   # status message
   output$archive_status <- renderText({
     validate(need(!is.null(values$saved), message = "no saved information"),
-             need(!is.null(values$saved[element_input()]), message = "no element-specific data saved"))
-    if (values$saved[element_input()])
+             need(!is.null(values$saved[mode_input()]), message = "no element-specific data saved"))
+    if (values$saved[mode_input()])
       return(Sys.time() %>% format(" (saved at %H:%m:%S on %d %b %Y)"))
     else
       return("")
@@ -105,28 +105,28 @@ historyInfoTable <- function(input, output, session,
   # store hot data in reactive values
   observe({
     validate(need(input$hot, message = "no parameters"))
-   isolate(values$hot[[element_input()]] <-  suppressWarnings(hot_to_r(input$hot)))
+   isolate(values$hot[[mode_input()]] <-  suppressWarnings(hot_to_r(input$hot)))
   })
 
   # render handsontable
   output$hot = renderRHandsontable({
-    # trigger based on new init_data and element_input()
+    # trigger based on new init_data and mode_input()
     init_data()
     hot <- isolate(values$hot)
 
     validate(
-      need(element_input(), message = "no element selected"), # switch element
+      need(mode_input(), message = "no element selected"), # switch element
       need(hot, message = "no parameters"),
-      need(hot[[element_input()]], message = "no element-specific parameters"))
+      need(hot[[mode_input()]], message = "no element-specific parameters"))
 
-    message("INFO: generating '", ns(NULL), "' table for element ", element_input()) # debug
+    message("INFO: generating '", ns(NULL), "' table for element ", mode_input())
 
     # generate handsontable
-    hot[[element_input()]] %>%
-      select(Caption, Check, Value, Units, Info) %>%
+    hot[[mode_input()]] %>%
+      select(Mode, Caption, Check, Value, Units, Info) %>%
       rhandsontable() %>%
       hot_table(readOnly = TRUE, highlightRow = TRUE, columnSorting = FALSE, contextMenu = FALSE,
-                customBorders = generate_borders(hot[[element_input()]]$Type)) %>%
+                customBorders = generate_borders(hot[[mode_input()]]$Type)) %>%
       hot_col(col = "Value", readOnly = FALSE, format = number_format) %>%
       hot_col(col = "Check", readOnly = FALSE)
   })

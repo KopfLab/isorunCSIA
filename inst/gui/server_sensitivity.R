@@ -1,7 +1,7 @@
 ### SENSITVITY & PEAK SHAPE
 sensitivity_table <- callModule(
   historyInfoTable, "sensitivity", parameters = parameters, history_files = history_files,
-  element_input = reactive(input$element), clear_input = reactive(input$instrument_new_clear))
+  mode_input = reactive(input$mode), clear_input = reactive(input$instrument_new_clear))
 peak_shape_files <- callModule(fileSelector, "peak_shape_files", pattern = "\\.scn$",
                                root = data_dir, root_name = "All", size = 12, multiple = FALSE,
                                number_recent = 10, exclude_recent = INSTRUMENT_HISTORY_FOLDER)
@@ -15,7 +15,7 @@ observe({
       values$peak_shape_file <- file
       message("Saving peak shape file ", file)
       file.copy(from = file.path(data_dir, file),
-                to = file.path(data_dir, PEAK_SHAPE_FOLDER, sprintf("%s_%s_peak_shape.scn", format(Sys.time(), "%Y%m%d_%H%M%S"), isolate(input$element))))
+                to = file.path(data_dir, PEAK_SHAPE_FOLDER, sprintf("%s_%s_peak_shape.scn", format(Sys.time(), "%Y%m%d_%H%M%S"), isolate(input$mode))))
     }
   })
 })
