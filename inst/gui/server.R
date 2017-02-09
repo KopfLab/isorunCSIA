@@ -25,7 +25,9 @@ server <- shinyServer(function(input, output, session) {
     history_variables = c(),
     data_files_list = c(),
     data_files_selected = c(),
-    data_files_objects = list()
+    data_files_objects = list(),
+    data_files_table_data = NULL,
+    data_files_mass_data = NULL
   )
 
   # INSTRUMENT NEW PARAMETER RECORD ----

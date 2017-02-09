@@ -4,7 +4,7 @@ library(ggplot2)
 #' fileSelector
 #' @param allow_upload whether to allow upload
 #' @note requires use of shinyjs (shinyjs::useShinyjs() earlier on the page)
-plotDownloadLink <- function(id, label = "Save plot") {
+plotDownloadLink <- function(id, label = "Save plot", default_filename = "plot.pdf") {
   ns <- NS(id)
   tagList(
 
@@ -16,7 +16,7 @@ plotDownloadLink <- function(id, label = "Save plot") {
 
     # MODAL SAVE DIALOG ----
     bsModal(ns("save_dialog"), label, ns("download_plot_link"), size = "small",
-            textInput(ns("save_name"), "Filename:", "ncycle_arrow_plot.pdf"),
+            textInput(ns("save_name"), "Filename:", default_filename),
             numericInput(ns("save_width"), "Width [inches]:", 12),
             numericInput(ns("save_height"), "Height [inches]:", 8),
             downloadButton(ns("save_plot"), "Save", icon("save"))

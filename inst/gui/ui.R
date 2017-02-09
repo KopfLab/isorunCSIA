@@ -151,11 +151,8 @@ ui <- dashboardPage(
         status = "success", solidHeader = TRUE, width = 12,
 
         selectInput("data_files_list", label = NULL, multiple = TRUE, size = 8, selectize = FALSE,
-                    choices = c("Specs_break/Acquisition_161219_160916_CO2 zero _.dxf", "Specs_break/Acquisition_161219_161715_CO2 zero _.dxf",
-                                "Specs_break/Acquisition_161219_194845_H2 zero _.dxf"), # debug
-                    selected = c("Specs_break/Acquisition_161219_160916_CO2 zero _.dxf", "Specs_break/Acquisition_161219_161715_CO2 zero _.dxf",
-                                 "Specs_break/Acquisition_161219_194845_H2 zero _.dxf") # debug
-                      ),
+                    choices = c(),
+                    selected = c()),
 
         column(4, div(align = "left",
             modalFileSelectorInput(id = "data_files_select",
@@ -171,7 +168,20 @@ ui <- dashboardPage(
       ),
 
       box(
-        title = "Data", collapsible = TRUE,
+        title = "Chromatograms", collapsible = TRUE,
+        status = "warning", solidHeader = TRUE, width = 12,
+        plotDownloadLink(id = "data_plot_download"),
+        tabsetPanel(
+          id = "data_plot_tabs", selected = "i",
+          tabPanel("Interactive Plot", value = "i",
+                   plotlyOutput("data_iplot", height="500px", width = "100%")),
+          tabPanel("Static Plot", value = "gg",
+                   plotOutput("data_plot", height="500px", width = "100%"))
+        )
+      ),
+
+      box(
+        title = "Data Table", collapsible = TRUE,
         status = "info", solidHeader = TRUE, width = 12,
         guiDataTable("data_files_table")
       )

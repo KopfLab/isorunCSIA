@@ -46,15 +46,63 @@ observe({
 data_files_table <- callModule(serverDataTable, "data_files_table", selection = "none") # no selection for now
 observe({ data_files_table$rows_selected() }) # no selection allowed for now
 
-# load data into data files table and plot
+# trigger load data
 observeEvent(input$data_files_load, {
   req(input$data_files_load)
   isolate({
      message("INFO: Loading ", length(input$data_files_list), " data files")
-     data <- get_data_files_table_data()
-     print(sapply(data, class))
-     data_files_table$update(data)
+     values$data_files_table_data <- get_data_files_table_data()
+     values$data_files_mass_data <- get_data_files_mass_data()
   })
+})
+
+# data table
+observe({
+  req(values$data_files_table_data)
+  data_files_table$update(values$data_files_table_data)
+})
+
+# generatte data plots
+output$data_plot <- renderPlot({
+  generate_data_plot() + theme(text = element_text(size = 24))
+})
+output$data_iplot <- renderPlotly({
+  ggplotly(generate_data_plot() +
+             theme(legend.position = "none") +
+             theme(text = element_text(size = 16)))
+})
+
+# download data plot
+default_data_plot_name <-
+  reactive(paste0(Sys.time() %>% format("%Y%m%d_"), "_data_plot.pdf"))
+callModule(plotDownloadDialog, "data_plot_download",
+           generate_data_plot,
+           default_data_plot_name)
+
+#--- PLOTTING functions
+
+# generate the data overview plot (chromatogram)
+generate_data_plot <- reactive({
+  req(values$data_files_mass_data)
+  message("INFO: Generating data plot")
+  withProgress(
+    message = 'Generating plot...', value = 0, {
+      incProgress(0.25, detail = "Assembling.")
+      plot <-
+        values$data_files_mass_data %>%
+        mutate(
+          Mass = variable,
+          File = file
+        ) %>%
+        ggplot() +
+        aes(time, signal, linetype = Mass, colour = File) +
+        geom_line() +
+        scale_x_continuous(expand = c(0,0)) +
+        labs(x = "Time [s]", y = "Signal [mV]", linetype = "Trace", colour = "File") +
+        theme_bw()
+      incProgress(0.5, detail = "Rendering.")
+    })
+  return(plot)
 })
 
 #--- UTILITY functions
@@ -90,10 +138,12 @@ get_iso_data_tables <- function(files){
       cols2 <- names(rows_set2)[sapply(rows_set2, function(col) !all(is.na(col)))]
       cols2 <- cols2[!cols2 %in% cols1] # avoid duplicates
       mutate(cbind(rows_set1[cols1], rows_set2[cols2]), File = file$filename)[c("File", names(dt))]
-    }) %>% bind_rows() %>% as_data_frame()
+    }) %>%
+    bind_rows() %>%
+    as_data_frame()
 }
 
-#' load isotope data (could be an exported function)
+#' load isotope data (could be an exported function except for progress)
 load_iso_data <- function(files, loaded = c(), root = ".", quiet = FALSE) {
 
   # check which files have not been loaded yet
