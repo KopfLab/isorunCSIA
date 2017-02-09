@@ -1,6 +1,6 @@
 Package: isorunCSIA
 Type: Package
-Version: 0.2.1
+Version: 0.2.2
 Date: 2017-01-15
 Author: Sebastian Kopf
 Maintainer: Sebastian Kopf <sebastian.kopf@colorado.edu>
@@ -14,13 +14,8 @@ Imports:
     Rcpp,
     isoread,
     tidyr,
-    tibble,
     dplyr,
-    scales,
     ggplot2,
-    DBI,
-    assertthat,
-    gtable,
     plotly (>= 4.5.6.900)
 Suggests:
     testthat,

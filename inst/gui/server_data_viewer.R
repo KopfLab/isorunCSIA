@@ -15,7 +15,7 @@ observe({
       files <- files[!files %in% values$data_files_list]
       message("INFO: adding ", length(files), " new data files to list")
       values$data_files_list <- c(values$data_files_list, files) %>% unique() %>% sort()
-      selected <- files[values$data_files_list %in% values$data_files_selected]
+      selected <- values$data_files_list[values$data_files_list %in% values$data_files_selected]
       updateSelectInput(session, "data_files_list",
                         choices = values$data_files_list, selected = selected)
     }
@@ -111,25 +111,30 @@ generate_data_plot <- reactive({
 get_data_files_mass_data <- function() {
   # make sure selected data files are loaded
   values$data_files_objects <- load_iso_data(input$data_files_list, loaded = values$data_files_objects, root = data_dir)
-  get_iso_mass_traces(values$data_files_objects[input$data_files_list])
+  get_iso_mass_traces(values$data_files_objects[names(values$data_files_objects) %in% input$data_files_list])
 }
 
 # retrieve data tables (only when called explicitly hence not reactive)
 get_data_files_table_data <- function() {
   # make sure selected data files are loaded
   values$data_files_objects <- load_iso_data(input$data_files_list, loaded = values$data_files_objects, root = data_dir)
-  get_iso_data_tables(values$data_files_objects[input$data_files_list])
+  get_iso_data_tables(values$data_files_objects[names(values$data_files_objects) %in% input$data_files_list])
 }
 
 #' get mass trace data (could be an exported function?)
 get_iso_mass_traces <- function(files) {
-  data <- lapply(files, function(i) mutate(i$get_mass_data(melt = T)[c("time", "signal", "variable")], file = i$filename))
-  suppressWarnings(as_data_frame(bind_rows(data)))
+  data <-
+    files %>%
+    lapply(function(i) mutate(i$get_mass_data(melt = T)[c("time", "signal", "variable")], file = i$filename)) %>%
+    bind_rows() %>%
+    as_data_frame()
+  if (nrow(data) == 0) return(NULL)
+  else return(data)
 }
 
 #' get table data (could be an export function?)
 get_iso_data_tables <- function(files){
-  files %>%
+  data <- files %>%
     lapply(function(file) {
       dt <- file$get_data_table() %>% arrange(row_number())
       rows_set1 <- dt %>% filter(!is.na(`Nr.`))
@@ -141,6 +146,8 @@ get_iso_data_tables <- function(files){
     }) %>%
     bind_rows() %>%
     as_data_frame()
+  if (nrow(data) == 0) return(NULL)
+  else return(data)
 }
 
 #' load isotope data (could be an exported function except for progress)
