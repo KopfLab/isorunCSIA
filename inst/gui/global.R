@@ -18,6 +18,7 @@ library(DT)
 source("module_file_browser.R")
 source("module_ggplot_download.R")
 source("module_history_info_entry.R")
+source("module_data_table.R")
 source("utils.R")
 
 # make sure base directory is set

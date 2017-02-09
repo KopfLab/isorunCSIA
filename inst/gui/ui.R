@@ -165,7 +165,7 @@ ui <- dashboardPage(
             h4(
               actionLink("data_files_remove", "Remove", icon = icon("remove")), " | ",
               actionLink("data_files_export", "Export", icon = icon("cloud-download")), " |",
-              actionLink("data_files_plot", "Load", icon = icon("bar-chart"))
+              actionLink("data_files_load", "Load", icon = icon("bar-chart"))
             )))
 
       ),
@@ -173,7 +173,7 @@ ui <- dashboardPage(
       box(
         title = "Data", collapsible = TRUE,
         status = "info", solidHeader = TRUE, width = 12,
-        DT::dataTableOutput("data_files_data_table")
+        guiDataTable("data_files_table")
       )
 
     ), # / DATA tabItem

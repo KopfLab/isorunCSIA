@@ -42,37 +42,22 @@ observe({
   })
 })
 
-# plot selected
-output$data_files_data_table <- DT::renderDataTable({
+# data files table
+data_files_table <- callModule(serverDataTable, "data_files_table", selection = "none") # no selection for now
+observe({ data_files_table$rows_selected() }) # no selection allowed for now
 
-  validate(need(input$data_files_plot, message = FALSE))
+# load data into data files table and plot
+observeEvent(input$data_files_load, {
+  req(input$data_files_load)
   isolate({
-    message("INFO: Activating ", length(input$data_files_list), " data files")
-    data <- get_data_files_table_data()
+     message("INFO: Loading ", length(input$data_files_list), " data files")
+     data <- get_data_files_table_data()
+     print(sapply(data, class))
+     data_files_table$update(data)
   })
-
-  datatable(data,
-            rownames = FALSE, selection = "none",
-            #extensions = c("FixedHeader", "Scroller"), # for scrolling instead of pagination
-            extensions = c("Buttons", "ColReorder", "KeyTable"),
-            options = list(
-              dom = 'Bftpli', # Buttons, Filter, Table, Pagniation, Length, Information
-              pageLength = 5, lengthMenu = c(5, 10, 15, 20, 50, 100), # paging menu
-              keys = TRUE, #KeyTable extension
-              #fixedHeader = TRUE, #FixedHeader extension
-              #deferRender = TRUE, scrollY = 200, scroller = TRUE, # Scroller extension
-              scrollX = TRUE,
-              colReorder = TRUE, # ColReorder extension, allow columns reorder
-              buttons = list(list(
-                extend = "colvis", columns = 0:(ncol(data)-1) # Buttons extension, allow column selection
-              ))
-            )
-  ) %>% formatSignif(sapply(data, class) == "numeric", digits = 3)
-}, server = FALSE)
-
-observe({
-
 })
+
+#--- UTILITY functions
 
 # retrieve mass traces (only when called explicitly hence not reactive)
 get_data_files_mass_data <- function() {
@@ -87,8 +72,6 @@ get_data_files_table_data <- function() {
   values$data_files_objects <- load_iso_data(input$data_files_list, loaded = values$data_files_objects, root = data_dir)
   get_iso_data_tables(values$data_files_objects[input$data_files_list])
 }
-
-#--- UTILITY functions
 
 #' get mass trace data (could be an exported function?)
 get_iso_mass_traces <- function(files) {
@@ -106,7 +89,6 @@ get_iso_data_tables <- function(files){
       cols1 <- names(rows_set1)[sapply(rows_set1, function(col) !all(is.na(col)))]
       cols2 <- names(rows_set2)[sapply(rows_set2, function(col) !all(is.na(col)))]
       cols2 <- cols2[!cols2 %in% cols1] # avoid duplicates
-
       mutate(cbind(rows_set1[cols1], rows_set2[cols2]), File = file$filename)[c("File", names(dt))]
     }) %>% bind_rows() %>% as_data_frame()
 }

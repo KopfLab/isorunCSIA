@@ -12,6 +12,6 @@ guard 'process', name: 'Shiny', command: ['R', '-e', "isorunCSIA:::run_gui_dev(b
   watch(%r{#{dir}/.+\.R$})
 end
 
-guard 'livereload', grace_period: 3 do
+guard 'livereload', grace_period: 1 do
   watch(%r{#{dir}/.+\.R$})
 end
