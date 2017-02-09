@@ -16,6 +16,7 @@ Imports:
     tidyr,
     tibble,
     dplyr,
+    scales,
     ggplot2,
     DBI,
     assertthat,
