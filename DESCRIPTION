@@ -16,6 +16,7 @@ Imports:
     tidyr,
     dplyr,
     ggplot2,
+    DBI,
     plotly (>= 4.5.6.900)
 Suggests:
     testthat,
@@ -28,7 +29,6 @@ Suggests:
     shinydashboard,
     shinyAce,
     dtplyr,
-    DBI,
     DT,
     data.table,
     rhandsontable,
