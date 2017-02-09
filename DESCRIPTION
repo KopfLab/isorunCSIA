@@ -14,6 +14,7 @@ Imports:
     Rcpp,
     isoread,
     tidyr,
+    tibble,
     dplyr,
     ggplot2,
     DBI,
