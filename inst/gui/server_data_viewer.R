@@ -29,6 +29,11 @@ observe({
   isolate(values$data_files_selected <- input$data_files_list)
 })
 
+# keep track of double click in the data files list
+observe({
+  message("here: ", input$data_file_list_dblclick)
+})
+
 # remove data files from consideration
 observe({
   validate(need(input$data_files_remove, message = FALSE))
@@ -47,8 +52,8 @@ data_files_table <- callModule(serverDataTable, "data_files_table", selection = 
 observe({ data_files_table$rows_selected() }) # no selection allowed for now
 
 # trigger load data
-observeEvent(input$data_files_load, {
-  req(input$data_files_load)
+observe({
+  req(!is.null(input$data_files_load) | !is.null(input$data_file_list_dblclick))
   isolate({
      message("INFO: Loading ", length(input$data_files_list), " data files")
      values$data_files_table_data <- get_data_files_table_data()

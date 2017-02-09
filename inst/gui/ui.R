@@ -153,6 +153,11 @@ ui <- dashboardPage(
         selectInput("data_files_list", label = NULL, multiple = TRUE, size = 8, selectize = FALSE,
                     choices = c(),
                     selected = c()),
+        tags$script(sprintf( # double click activation
+          " $('#%s').on('dblclick', function(){
+          var obj = $('select#%s')[0];
+          Shiny.onInputChange('%s', obj.options[obj.selectedIndex].value);
+          })", "data_files_list", "data_files_list", "data_file_list_dblclick")),
 
         column(4, div(align = "left",
             modalFileSelectorInput(id = "data_files_select",
