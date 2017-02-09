@@ -1,6 +1,6 @@
 Package: isorunCSIA
 Type: Package
-Version: 0.2
+Version: 0.2.1
 Date: 2017-01-15
 Author: Sebastian Kopf
 Maintainer: Sebastian Kopf <sebastian.kopf@colorado.edu>
@@ -28,6 +28,7 @@ Suggests:
     shinydashboard,
     shinyAce,
     dtplyr,
+    DBI,
     DT,
     data.table,
     rhandsontable,
