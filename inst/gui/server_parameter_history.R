@@ -10,35 +10,40 @@ get_history_data <- reactivePoll(
   # reads the log files
   valueFunc = function() {
     message("INFO: re-loading history files")
-    files <-
-      data_frame(
-        filepath = HISTORY_FILES,
-        Category = names(HISTORY_FILES)
-      ) %>% group_by(filepath, Category) %>%
-      do({
-        if (file.exists(.$filepath[1])) {
-          read.csv(.$filepath[1], header = TRUE, stringsAsFactors = FALSE,
-                   row.names = NULL, colClasses = c(timestamp = "POSIXct", user = "character", mode = "character", notes = "character")) %>%
-            gather(Column, value, -timestamp, -user, -mode, -notes)
-        } else {
-          data_frame()
-        }
-      }) %>%
-      ungroup()
+    files <- data_frame()
+    tryCatch({
+      files <-
+        data_frame(
+          filepath = HISTORY_FILES,
+          Category = names(HISTORY_FILES)
+        ) %>% group_by(filepath, Category) %>%
+        do({
+          if (file.exists(.$filepath[1])) {
+            suppressWarnings(read.csv(.$filepath[1], header = TRUE, stringsAsFactors = FALSE,
+                     row.names = NULL, colClasses = c(timestamp = "POSIXct", user = "character",
+                                                      mode = "character", notes = "character"))) %>%
+              gather(Column, value, -timestamp, -user, -mode, -notes)
+          } else {
+            data_frame()
+          }
+        }) %>%
+        ungroup()
+      if (nrow(files) > 0) {
+        files <- files %>%
+          mutate(Category = as.character(Category)) %>% # avoid factor + character join
+          left_join(
+            rename(parameters, mode_def = Mode),
+            by = c("Category", "Column")) %>%
+          mutate(date = as.Date(timestamp, tz = format(timestamp[1], "%Z"))) %>%
+          select(-filepath) %>%
+          # remove entries without matching defintion and missing values
+          filter(!is.na(Type), !is.na(value), !is.na(mode_def)) %>%
+          # make sure no incorrect replicates
+          filter(is.na(mode) || mode_def == "all" || mapply(grepl, mode, mode_def, fixed=TRUE))
+      }
+    }, error = function(e) message("ERROR: problem loading history file - perhaps configuration changed, in which case saving a new history record will solve the problem, error: ", e$message))
     if (nrow(files) == 0) return(NULL)
-    else {
-      files %>%
-        mutate(Category = as.character(Category)) %>% # avoid factor + character join
-        left_join(
-          rename(parameters, mode_def = Mode),
-          by = c("Category", "Column")) %>%
-        mutate(date = as.Date(timestamp, tz = format(timestamp[1], "%Z"))) %>%
-        select(-filepath) %>%
-        # remove entries without matching defintion and missing values
-        filter(!is.na(Type), !is.na(value), !is.na(mode_def)) %>%
-        # make sure no incorrect replicates
-        filter(is.na(mode) || mode_def == "all" || mapply(grepl, mode, mode_def, fixed=TRUE))
-    }
+    else return(files)
   }
 )
 
