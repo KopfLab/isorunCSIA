@@ -19,6 +19,7 @@ Imports:
     ggplot2,
     DBI,
     assertthat,
+    gtable,
     plotly (>= 4.5.6.900)
 Suggests:
     testthat,
