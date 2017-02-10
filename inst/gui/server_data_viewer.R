@@ -1,7 +1,7 @@
 ### DATA
 
 data_files_select <- callModule(fileSelector, "data_files_select", pattern = "\\.dxf$",
-                              root = data_dir, root_name = "All", sort_desc = TRUE, size = 12, multiple = TRUE,
+                              root = data_dir, root_name = "All", size = 12, multiple = TRUE,
                               number_recent = 50, sort_desc = TRUE,
                               exclude_recent = INSTRUMENT_HISTORY_FOLDER)
 
