@@ -41,7 +41,8 @@ get_history_data <- reactivePoll(
           # make sure no incorrect replicates
           filter(is.na(mode) || mode_def == "all" || mapply(grepl, mode, mode_def, fixed=TRUE))
       }
-    }, error = function(e) message("ERROR: problem loading history file - perhaps configuration changed, in which case saving a new history record will solve the problem, error: ", e$message))
+    }, error = function(e) message("ERROR: problem loading history file - perhaps configuration changed, in which case saving a new history record will solve the problem, error: ", e$message),
+    warning = function(w) message("WARNING: problem loading history files"))
     if (nrow(files) == 0) return(NULL)
     else return(files)
   }

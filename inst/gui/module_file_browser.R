@@ -169,7 +169,7 @@ fileSelector <- function(input, output, session,
       new_content <-
         list.files(root, pattern = pattern, full.names = T, recursive = TRUE) %>%
         lapply(function(file) list(file = file, mtime = file.mtime(file))) %>%
-        bind_rows() %>%
+        bind_rows(data_frame(file = character(0), mtime = integer(0))) %>%
         filter(!grepl(exclude_recent, file)) %>%
         arrange(desc(mtime)) %>%
         filter(row_number() <= number_recent)
