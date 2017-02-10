@@ -4,7 +4,8 @@ sensitivity_table <- callModule(
   mode_input = reactive(input$mode), user_input = reactive(input$user), clear_input = reactive(input$instrument_new_clear))
 peak_shape_files <- callModule(fileSelector, "peak_shape_files", pattern = "\\.scn$",
                                root = data_dir, root_name = "All", size = 12, multiple = FALSE,
-                               number_recent = 10, exclude_recent = INSTRUMENT_HISTORY_FOLDER)
+                               number_recent = 20, sort_desc = TRUE,
+                               exclude_recent = INSTRUMENT_HISTORY_FOLDER)
 
 # save peak shape file name when modal is closed
 observe({
