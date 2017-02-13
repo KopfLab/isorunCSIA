@@ -167,9 +167,19 @@ ui <- dashboardPage(
             h4(
               actionLink("data_files_remove", "Remove", icon = icon("remove")), " | ",
               actionLink("data_files_export", "Export", icon = icon("cloud-download")), " |",
-              actionLink("data_files_load", "Load", icon = icon("bar-chart"))
-            )))
-
+              bsTooltip("data_files_export", "Export the selected files to excel"),
+              actionLink("data_files_load", "Load", icon = icon("bar-chart")),
+              bsTooltip("data_files_load", "Load the selected files together")
+            )),
+            # Excel export modal dialog
+            bsModal("data_files_export_dialog", "Export to Excel",
+                    "data_files_export", size = "small",
+                    textInput("data_files_export_name", "Filename:", ""),
+                    selectInput("data_files_export_columns", "Columns to export:", choices = c(),
+                                multiple = TRUE, selectize = FALSE, size = 10, width = "100%"),
+                    downloadButton("data_files_export_save", "Save", icon("save"))
+            )
+        )
       ),
 
       box(

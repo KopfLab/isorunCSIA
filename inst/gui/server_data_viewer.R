@@ -52,20 +52,60 @@ observe({
 data_files_table <- callModule(serverDataTable, "data_files_table", selection = "none") # no selection for now
 observe({ data_files_table$rows_selected() }) # no selection allowed for now
 
-# trigger load data
+# trigger mass data load
 observe({
-  req(!is.null(input$data_files_load) | !is.null(input$data_file_list_dblclick))
+  req(!is.null(input$data_files_load) |
+        !is.null(input$data_file_list_dblclick))
   isolate({
-     message("INFO: Loading ", length(input$data_files_list), " data files")
-     values$data_files_table_data <- get_data_files_table_data()
+     message("INFO: Loading ", length(input$data_files_list), " data files' mass data")
      values$data_files_mass_data <- get_data_files_mass_data()
   })
 })
+
+# trigger table data load
+observe({
+  req(!is.null(input$data_files_load) |
+        !is.null(input$data_files_export) |
+        !is.null(input$data_file_list_dblclick))
+  isolate({
+    message("INFO: Loading ", length(input$data_files_list), " data files' table data")
+    values$data_files_table_data <- get_data_files_table_data()
+  })
+})
+
+# data export default filename
+observe({
+  req(input$data_files_export)
+  updateTextInput(session, "data_files_export_name",
+                  value = paste0(Sys.time() %>% format("%Y%m%d_"), "_data_export.xlsx"))
+})
+
+# data export button enabled/disabled
+observe({
+  if (is.null(input$data_files_export_columns) || length(input$data_files_export_columns) == 0)
+    disable("data_files_export_save")
+  else
+    enable("data_files_export_save")
+})
+
+# data export save
+output$data_files_export_save <- downloadHandler(
+  filename = function() { isolate(input$data_files_export_name) },
+  content = function(file) {
+    isolate({
+      message("INFO: Exporting data to ", input$data_files_export_name)
+      values$data_files_table_data[input$data_files_export_columns] %>%
+        openxlsx::write.xlsx(file = file)
+    })
+  })
 
 # data table
 observe({
   req(values$data_files_table_data)
   data_files_table$update(values$data_files_table_data)
+  updateSelectInput(session, "data_files_export_columns",
+                    choices = names(values$data_files_table_data),
+                    selected = c()) # fixme: should keep selection if possible
 })
 
 # generatte data plots
@@ -153,7 +193,11 @@ get_iso_data_tables <- function(files){
     bind_rows() %>%
     as_data_frame()
   if (nrow(data) == 0) return(NULL)
-  else return(data)
+  else {
+    # sanitize column names (remove trailing white spaces)
+    names(data) <- trimws(names(data))
+    return(data)
+  }
 }
 
 #' load isotope data (could be an exported function except for progress)
