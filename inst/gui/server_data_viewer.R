@@ -99,6 +99,16 @@ output$data_files_export_save <- downloadHandler(
     })
   })
 
+# data files download save
+output$data_files_download <- downloadHandler(
+  filename = function() { paste0(Sys.time() %>% format("%Y%m%d"), "_data.zip") },
+  content = function(file) {
+    files <- file.path(data_dir, isolate(values$data_files_selected))
+    zip(file, files = files, extra = "-j")
+  },
+  contentType = "application/zip"
+)
+
 # data table
 observe({
   req(values$data_files_table_data)

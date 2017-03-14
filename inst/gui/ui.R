@@ -162,8 +162,10 @@ ui <- dashboardPage(
         column(8, div(align = "right",
             h4(
               actionLink("data_files_remove", "Remove", icon = icon("remove")), " | ",
-              actionLink("data_files_export", "Export", icon = icon("cloud-download")), " |",
+              actionLink("data_files_export", "Export Excel", icon = icon("cloud-download")), " |",
               bsTooltip("data_files_export", "Export the selected files to excel"),
+              downloadLink("data_files_download", class = NULL, icon("file-zip-o"), "Download"), " |",
+              bsTooltip("data_files_download", "Download data files as a zip archieve"),
               actionLink("data_files_load", "Load", icon = icon("bar-chart")),
               bsTooltip("data_files_load", "Load the selected files together")
             )),
