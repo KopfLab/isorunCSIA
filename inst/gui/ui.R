@@ -20,10 +20,6 @@ ui <- dashboardPage(
     menuItem("Data", tabName = "data", icon = icon("bar-chart"), selected = TRUE),
     menuItem("Settings", tabName = "settings", icon = icon("wrench")),
     radioButtons("mode", label = "Mode", choices = modes$Mode),
-    menuItem(
-      "Tuning", tabName = "tunings", icon = icon("music"),
-      menuSubItem("Select files", tabName = "tuning_files", icon = icon("files-o")),
-      menuSubItem("Analysis", tabName = "tuning_analyze", icon = icon("bar-chart"))),
 
     # STYLESHEET ----
     tags$head(
@@ -207,32 +203,25 @@ ui <- dashboardPage(
 
     # SETTINGS ----
 
-    # TUNING: File selection ----
+    # TUNING:  ----
     tabItem(
-      tabName = "tuning_files",
+      tabName = "tuning",
 
+      br(),
+      box(title = NULL, collapsible = FALSE, solidHeader = FALSE, width = 12,
+          column(4, div(align = "left", textInput("tuning_user", NULL, placeholder = "Please enter your name"))),
+          column(8, div(align = "right", h4(actionLink("tuning_new_clear", "Clear all", icon = icon("rotate-left")))))
+      ),
 
-      # TUNING: File preview box ----
-      box(
-        plotDownloadLink(id = "tuning_file_download"),
+      box(title = "Tuning parameters", collapsible = TRUE, solidHeader = TRUE, width = 12, status = "warning",
+          historyInfoInput(id = "tuning"),
+          historyArchiveButton(id = "tuning"),
+          modalFileSelectorInput(id = "tuning_peak_shape_files",
+                                 open_label = "Save peak shape file", link_wrapper = function(dlg_link) {
+            h4(dlg_link, textOutput("tuning_peak_shape_file", inline = TRUE))
+          }, allow_upload = FALSE)
+      )
 
-        tabsetPanel(id = "tuning_file_plot_tabs",
-          tabPanel("Static Plot", value = "gg",
-                   plotOutput("tuning_file_plot", height="500px", width = "100%")),
-          tabPanel("Interactive Plot", value = "i",
-                   plotlyOutput("tuning_file_iplot", height="500px", width = "100%"))
-        ),
-
-        title = "Tuning file quick view",
-        status = "info", solidHeader = TRUE, width = 12),
-
-      # TUNING: File preview code ----
-      box(
-        aceEditor("tuning_plot_code", mode = "r",
-                  theme="ambiance", readOnly = TRUE,
-                  height = "200px"),
-        title = "Code preview",
-        status = "success", solidHeader = TRUE, width = 12)
     ), # / tabItem
 
     # TUNING: Analysis ----

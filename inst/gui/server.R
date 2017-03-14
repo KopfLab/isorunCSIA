@@ -22,6 +22,7 @@ server <- shinyServer(function(input, output, session) {
   values <- reactiveValues(
     full_scan_file = NULL, # last saved full scan file
     peak_shape_file = NULL, # last saved peak shape file
+    tuning_peak_shape_file = NULL, # last saved tuning peak shape file
     history_variables = c(),
     data_files_list = c(),
     data_files_selected = c(),
@@ -40,6 +41,14 @@ server <- shinyServer(function(input, output, session) {
   source("server_background.R", local = TRUE)
   source("server_sensitivity.R", local = TRUE)
   source("server_instrument_parameters.R", local = TRUE)
+
+  # TUNING
+  observe({ # reset
+    input$tuning_new_clear
+    values$tuning_peak_shape_file <- NULL
+    updateTextInput(session, "tuning_user", value = "")
+  })
+  source("server_tuning.R", local = TRUE)
 
   # PARAMETER HISTORY
   source("server_parameter_history.R", local = TRUE)

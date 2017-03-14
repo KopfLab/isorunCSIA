@@ -32,7 +32,8 @@ INSTRUMENT_HISTORY_FOLDER <- "instrument_history"
 HISTORY_FILES <- c(
   "background" = file.path(.base_dir, INSTRUMENT_HISTORY_FOLDER, "instrument_background_history.csv"),
   "sensitivity" = file.path(.base_dir, INSTRUMENT_HISTORY_FOLDER, "instrument_sensitivity_history.csv"),
-  "parameters" = file.path(.base_dir, INSTRUMENT_HISTORY_FOLDER, "instrument_parameters_history.csv")
+  "parameters" = file.path(.base_dir, INSTRUMENT_HISTORY_FOLDER, "instrument_parameters_history.csv"),
+  "tuning" = file.path(.base_dir, INSTRUMENT_HISTORY_FOLDER, "instrument_tuning_history.csv")
 )
 FULL_SCAN_FOLDER <- file.path(INSTRUMENT_HISTORY_FOLDER, "full_scans")
 PEAK_SHAPE_FOLDER <- file.path(INSTRUMENT_HISTORY_FOLDER, "peak_shapes")
