@@ -111,7 +111,7 @@ get_history_plot <- reactive({
     geom_point(size = 3) +
     theme_bw() +
     scale_x_datetime() +
-    facet_grid(Panel~., scales = "free_y")
+    facet_wrap(~Panel, scales = "free_y", ncol=1)
 })
 
 output$history_plot <- renderPlot(get_history_plot() + theme(text = element_text(size = 24)))
