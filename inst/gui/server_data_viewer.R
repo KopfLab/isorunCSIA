@@ -225,7 +225,7 @@ load_iso_data <- function(files, loaded = c(), root = ".", quiet = FALSE) {
       for (file in not_loaded_yet) {
         incProgress(1/n, detail = paste0("Reading ", file, " ..."))
         tryCatch({
-          iso_file <- list(isoread::isoread(file.path(root, file), type = "CFLOW", quiet = quiet)) %>% setNames(file)
+          iso_file <- list(isoread::isoread(file.path(root, file), quiet = quiet)) %>% setNames(file)
           iso_files <- c(iso_files, iso_file)
         },
         error = function(e) message("ERROR: encountered error while reading file ", file, ": ", e$message),

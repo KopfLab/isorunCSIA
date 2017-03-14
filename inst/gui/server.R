@@ -28,7 +28,11 @@ server <- shinyServer(function(input, output, session) {
     data_files_selected = c(),
     data_files_objects = list(),
     data_files_table_data = NULL,
-    data_files_mass_data = NULL
+    data_files_mass_data = NULL,
+    scan_files_list = c(),
+    scan_files_selected = c(),
+    scan_files_objects = list(),
+    scan_files_data = NULL
   )
 
   # INSTRUMENT NEW PARAMETER RECORD ----
@@ -55,5 +59,9 @@ server <- shinyServer(function(input, output, session) {
 
   # DATA
   source("server_data_viewer.R", local = TRUE)
+
+  # SCANS
+  source("server_scans_viewer.R", local = TRUE)
+
 
 })

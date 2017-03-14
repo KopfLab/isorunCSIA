@@ -17,7 +17,8 @@ ui <- dashboardPage(
     menuItem("Instrument", tabName = "instrument", icon = icon("cog")),
     menuItem("Tuning", tabName = "tuning", icon = icon("music")),
     menuItem("Standards", tabName = "standards", icon = icon("check")),
-    menuItem("Data", tabName = "data", icon = icon("bar-chart"), selected = TRUE),
+    menuItem("Data", tabName = "data", icon = icon("pie-chart")),
+    menuItem("Scans", tabName = "scans", icon = icon("bar-chart"), selected = TRUE),
     menuItem("Settings", tabName = "settings", icon = icon("wrench")),
     radioButtons("mode", label = "Mode", choices = modes$Mode),
 
@@ -201,6 +202,52 @@ ui <- dashboardPage(
 
     ), # / DATA tabItem
 
+
+    # SCANS ----
+
+    tabItem(
+      tabName = "scans",
+
+      br(),
+      box(
+        title = "Scan files", collapsible = TRUE,
+        status = "success", solidHeader = TRUE, width = 12,
+
+        selectInput("scan_files_list", label = NULL, multiple = TRUE, size = 8, selectize = FALSE,
+                    choices = c(),
+                    selected = c()),
+        tags$script(sprintf( # double click activation
+          " $('#%s').on('dblclick', function(){
+          var obj = $('select#%s')[0];
+          Shiny.onInputChange('%s', obj.options[obj.selectedIndex].value);
+          })", "scan_files_list", "scan_files_list", "scan_file_list_dblclick")),
+
+        column(4, div(align = "left",
+                      modalFileSelectorInput(id = "scan_files_select",
+                                             open_label = "Add scan files", close_label = "Add",
+                                             link_wrapper = h4, allow_upload = FALSE))),
+        column(8, div(align = "right",
+                      h4(
+                        downloadLink("scan_files_download", class = NULL, icon("file-zip-o"), "Download"), " |",
+                        bsTooltip("scan_files_download", "Download scan files as a zip archieve"),
+                        actionLink("scan_files_load", "Load", icon = icon("bar-chart")),
+                        bsTooltip("scan_files_load", "Load the selected scans together")
+                      )))
+      ), # // end BOX
+
+      box(
+        title = "Scans", collapsible = TRUE,
+        status = "warning", solidHeader = TRUE, width = 12,
+        plotDownloadLink(id = "scans_plot_download"),
+        tabsetPanel(
+          id = "scans_plot_tabs", selected = "i",
+          tabPanel("Interactive Plot", value = "i",
+                   plotlyOutput("scans_iplot", height="600px", width = "100%")),
+          tabPanel("Static Plot", value = "gg",
+                   plotOutput("scans_plot", height="600px", width = "100%"))
+        )
+      )
+  ), # / SCANS tabItem
 
 
     # SETTINGS ----
