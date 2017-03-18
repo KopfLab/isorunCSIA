@@ -136,6 +136,9 @@ ui <- dashboardPage(
     ),
 
     # STANDARDS ----
+    tabItem(tabName = "standards",
+            h1("Standards"),
+            p("No GUI for long-term analysis of standards available yet.")),
 
     # DATA ----
 
@@ -144,7 +147,7 @@ ui <- dashboardPage(
 
       br(),
       box(
-        title = "Relevant data files", collapsible = TRUE,
+        title = "Data files", collapsible = TRUE,
         status = "success", solidHeader = TRUE, width = 12,
 
         selectInput("data_files_list", label = NULL, multiple = TRUE, size = 8, selectize = FALSE,
@@ -251,6 +254,9 @@ ui <- dashboardPage(
 
 
     # SETTINGS ----
+    tabItem(tabName = "settings",
+            h1("Settings"),
+            p("No GUI for changing the settings available yet. Please change settings in the settings file manually (and carefully).")),
 
     # TUNING:  ----
     tabItem(
@@ -271,11 +277,8 @@ ui <- dashboardPage(
           }, allow_upload = FALSE)
       )
 
-    ), # / tabItem
+    ) # / TUNING tabItem
 
-    # TUNING: Analysis ----
-    tabItem(
-      tabName = "tuning_analyze", h2("hello"))
 
   ) %>% dashboardBody()
 
