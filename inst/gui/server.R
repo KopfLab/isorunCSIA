@@ -1,20 +1,10 @@
 # SERVER =====
 server <- shinyServer(function(input, output, session) {
 
-  # STARTUP =======
-  data_dir <- .GlobalEnv$.base_dir
-  if (!dir.exists(data_dir)) dir.create(data_dir)
-  if (!dir.exists(file.path(data_dir, INSTRUMENT_HISTORY_FOLDER))) dir.create(file.path(data_dir, INSTRUMENT_HISTORY_FOLDER))
-
-  message("\n***************************************************************",
-          "\nINFO: Launching GUI ...",
-          "\nINFO: App directory: ", getwd(),
-          "\nINFO: Data directory: ", data_dir,
-          "\nINFO: Settings file: ", file.path(data_dir, SETTINGS_FILE),
-          "\nINFO: History folder: ", file.path(data_dir, INSTRUMENT_HISTORY_FOLDER))
-
-  # SETTINGS =======
-  #global <- read_excel(file.path(data_dir, SETTINGS_FILE), sheet = "global")
+  # SETTINGS ----
+  message("\n\nINFO: Loading GUI instance ...")
+  message("INFO: Loading settings ...")
+  global <- read_excel(file.path(data_dir, SETTINGS_FILE), sheet = "global")
   modes <- read_excel(file.path(data_dir, SETTINGS_FILE), sheet = "modes")
   parameters <- read_excel(file.path(data_dir, SETTINGS_FILE), sheet = "parameters")
 

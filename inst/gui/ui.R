@@ -1,5 +1,7 @@
-# settings
-modes <- read_excel(.settings_file, sheet = "modes")
+# relevant settings
+global <- read_excel(file.path(data_dir, SETTINGS_FILE), sheet = "global")
+modes <- read_excel(file.path(data_dir, SETTINGS_FILE), sheet = "modes")
+def_menu <- get_setting(global, "default_menu", default = "welcome")
 
 # Define UI that plots the isotope label enrichment
 ui <- dashboardPage(
@@ -13,13 +15,13 @@ ui <- dashboardPage(
   # SIDEBAR ----
   sidebarMenu(
 
-    menuItem("Welcome", tabName = "welcome", icon = icon("info")),
-    menuItem("Instrument", tabName = "instrument", icon = icon("cog")),
-    menuItem("Tuning", tabName = "tuning", icon = icon("music")),
-    menuItem("Standards", tabName = "standards", icon = icon("check")),
-    menuItem("Data", tabName = "data", icon = icon("pie-chart")),
-    menuItem("Scans", tabName = "scans", icon = icon("bar-chart"), selected = TRUE),
-    menuItem("Settings", tabName = "settings", icon = icon("wrench")),
+    menuItem("Welcome", tabName = "welcome", icon = icon("info"), selected = def_menu == "welcome"),
+    menuItem("Instrument", tabName = "instrument", icon = icon("cog"), selected = def_menu == "instrument"),
+    menuItem("Tuning", tabName = "tuning", icon = icon("music"), selected = def_menu == "tuning"),
+    menuItem("Standards", tabName = "standards", icon = icon("check"), selected = def_menu == "standards"),
+    menuItem("Data", tabName = "data", icon = icon("pie-chart"), selected = def_menu == "data"),
+    menuItem("Scans", tabName = "scans", icon = icon("bar-chart"), selected = def_menu == "scans"),
+    menuItem("Settings", tabName = "settings", icon = icon("wrench"), selected = def_menu == "settings"),
     radioButtons("mode", label = "Mode", choices = modes$Mode),
 
     # STYLESHEET ----
@@ -236,7 +238,15 @@ ui <- dashboardPage(
                         actionLink("scan_files_load", "Load", icon = icon("bar-chart")),
                         bsTooltip("scan_files_load", "Load the selected scans together")
                       )))
-      ), # // end BOX
+      ), # / BOX
+
+      #  FIXME consider implementing an error/info log
+      #  alternatively have it as the message item top bar of the shinydashboard
+      # box(title = "Info Log", collapsible = TRUE, status = "info", solidHeader = true, width = 6,
+      #
+      #
+      #
+      #     ), # / BOX
 
       box(
         title = "Scans", collapsible = TRUE,

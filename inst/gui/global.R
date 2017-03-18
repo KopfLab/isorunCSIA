@@ -56,4 +56,15 @@ if (!file.exists(.settings_file)) {
   file.copy(.default_settings_file, .settings_file)
 }
 
+# STARTUP =======
+data_dir <- .GlobalEnv$.base_dir
+if (!dir.exists(data_dir)) dir.create(data_dir)
+if (!dir.exists(file.path(data_dir, INSTRUMENT_HISTORY_FOLDER))) dir.create(file.path(data_dir, INSTRUMENT_HISTORY_FOLDER))
+
+message("\n***************************************************************",
+        "\nINFO: Launching GUI ...",
+        "\nINFO: App directory: ", getwd(),
+        "\nINFO: Data directory: ", data_dir,
+        "\nINFO: Settings file: ", file.path(data_dir, SETTINGS_FILE),
+        "\nINFO: History folder: ", file.path(data_dir, INSTRUMENT_HISTORY_FOLDER))
 
