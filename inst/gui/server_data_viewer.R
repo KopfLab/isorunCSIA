@@ -161,7 +161,7 @@ generate_data_plot <- reactive({
   return(plot)
 })
 
-#--- UTILITY functions
+#--- specific UTILITY functions
 
 # retrieve mass traces (only when called explicitly hence not reactive)
 get_data_files_mass_data <- function() {
@@ -177,64 +177,3 @@ get_data_files_table_data <- function() {
   get_iso_data_tables(values$data_files_objects[names(values$data_files_objects) %in% input$data_files_list])
 }
 
-#' get mass trace data (could be an exported function?)
-get_iso_mass_traces <- function(files) {
-  data <-
-    files %>%
-    lapply(function(i) mutate(i$get_mass_data(melt = T)[c("time", "signal", "variable")], file = i$filename)) %>%
-    bind_rows() %>%
-    as_data_frame()
-  if (nrow(data) == 0) return(NULL)
-  else return(data)
-}
-
-#' get table data (could be an export function?)
-get_iso_data_tables <- function(files){
-  data <- files %>%
-    lapply(function(file) {
-      dt <- file$get_data_table() %>% arrange(row_number())
-      rows_set1 <- dt %>% filter(!is.na(`Nr.`))
-      rows_set2 <- dt %>% filter(is.na(`Nr.`))
-      cols1 <- names(rows_set1)[sapply(rows_set1, function(col) !all(is.na(col)))]
-      cols2 <- names(rows_set2)[sapply(rows_set2, function(col) !all(is.na(col)))]
-      cols2 <- cols2[!cols2 %in% cols1] # avoid duplicates
-      mutate(cbind(rows_set1[cols1], rows_set2[cols2]), File = file$filename)[c("File", names(dt))]
-    }) %>%
-    bind_rows() %>%
-    as_data_frame()
-  if (nrow(data) == 0) return(NULL)
-  else {
-    # sanitize column names (remove trailing white spaces)
-    names(data) <- trimws(names(data))
-    return(data)
-  }
-}
-
-#' load isotope data (could be an exported function except for progress)
-load_iso_data <- function(files, loaded = c(), root = ".", quiet = FALSE) {
-
-  # check which files have not been loaded yet
-  not_loaded_yet <- setdiff(files, names(loaded))
-
-  if ( (n <- length(not_loaded_yet)) > 0) {
-    message("INFO: loading ", n, " data files")
-
-    # read isodat files
-    iso_files <- list()
-    withProgress(message = 'Loading data...', value = 0, {
-      for (file in not_loaded_yet) {
-        incProgress(1/n, detail = paste0("Reading ", file, " ..."))
-        tryCatch({
-          iso_file <- list(isoread::isoread(file.path(root, file), quiet = quiet)) %>% setNames(file)
-          iso_files <- c(iso_files, iso_file)
-        },
-        error = function(e) message("ERROR: encountered error while reading file ", file, ": ", e$message),
-        warning = function(w) message("WARNING: encountered warning while reading file ", file, ": ", w$message))
-      }
-    })
-
-    return(c(loaded, iso_files))
-  } else {
-    return(loaded)
-  }
-}
