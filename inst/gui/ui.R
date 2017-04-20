@@ -81,7 +81,15 @@ ui <- dashboardPage(
           ),
 
           box(title = "Isotopic stability", collapsible = TRUE, solidHeader = TRUE, width = 12, status = "warning",
-            h4("ON/OFFs"),
+
+            modalFileSelectorInput(id = "lin_on_off_files", open_label = "Select on/off & linearity files",
+                                   link_wrapper = h4, allow_upload = FALSE),
+
+            div(id = "on_offs_div",
+                h4("ON/OFFs"),
+                guiDataTable("on_offs_table")
+            ) %>% shinyjs::hidden(),
+
             h4("Linearity")
           )
 

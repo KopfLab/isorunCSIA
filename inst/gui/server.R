@@ -22,7 +22,10 @@ server <- shinyServer(function(input, output, session) {
     scan_files_list = c(),
     scan_files_selected = c(),
     scan_files_objects = list(),
-    scan_files_data = NULL
+    scan_files_data = NULL,
+    lin_on_off_objects = list(),
+    lin_data_table = NULL,
+    on_off_data_table = NULL
   )
 
   # INSTRUMENT NEW PARAMETER RECORD ----
@@ -30,11 +33,13 @@ server <- shinyServer(function(input, output, session) {
     input$instrument_new_clear
     values$full_scan_file <- NULL
     values$peak_shape_file <- NULL
+    values$on_off_data_table <- NULL
     updateTextInput(session, "user", value = "")
   })
   source("server_background.R", local = TRUE)
   source("server_sensitivity.R", local = TRUE)
   source("server_instrument_parameters.R", local = TRUE)
+  source("server_linearity_on_offs.R", local = TRUE)
 
   # TUNING
   observe({ # reset
