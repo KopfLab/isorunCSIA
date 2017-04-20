@@ -85,3 +85,21 @@ serverDataTable <- function(input, output, session,
   )
 
 }
+
+
+#' server DT
+serverDataTableSimple <- function(input, output, session,
+                            rownames = FALSE, selection = "none", filter = "top", # data table defaults
+                            sig_digits = 3, # data table default numeric formatting
+                            extensions = c("Buttons", "KeyTable"), # data table defaults
+                            options = list( # data table defaults
+                              dom = "Bltpi", # Buttons, Length, Table, Pagniation, Information
+                              pageLength = 5, lengthMenu = c(5, 10, 15, 20, 50, 100), # paging menu
+                              keys = TRUE, #KeyTable extension for excel like navigation
+                              scrollX = TRUE, # automatic x scrolling for large table fits
+                              buttons = list(list(extend = "colvis")) # Buttons - allow column selection for all
+                            ), ...) {
+  serverDataTable(input, output, session, rownames = FALSE, selection = "none", filter="none",
+                  extensions = list(), options = list(dom = "t", pageLength = 50))
+}
+
