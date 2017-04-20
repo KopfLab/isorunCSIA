@@ -167,7 +167,7 @@ fileSelector <- function(input, output, session,
     if (values$recent_active) {
       # only show recent files (recursive from root)
       new_content <-
-        list.files(root, pattern = pattern, full.names = T, recursive = TRUE) %>%
+        list.files(root, pattern = pattern, full.names = T, recursive = TRUE, ignore.case = TRUE) %>%
         lapply(function(file) list(file = file, mtime = file.mtime(file))) %>%
         bind_rows(data_frame(file = character(0), mtime = integer(0))) %>%
         filter(!grepl(exclude_recent, file)) %>%
@@ -187,7 +187,7 @@ fileSelector <- function(input, output, session,
     } else {
       # content of selected folder (files and subfolders)
       path <- values$current_directory
-      new_content <- c(list.dirs(path, rec = FALSE), list.files(path, pattern = pattern))
+      new_content <- c(list.dirs(path, rec = FALSE), list.files(path, pattern = pattern, ignore.case = TRUE))
       old_content <- isolate(values$current_directory_content)
       if (!is.null(old_content) && setdiff(new_content, old_content) %>% length() == 0)
         return() # okay, nothing changed
@@ -196,7 +196,7 @@ fileSelector <- function(input, output, session,
       values$current_directory_content <- new_content
       message("INFO: (Re)loading folder: ", path, " (NS: ", ns(NULL),")")
       folders <- list.dirs(path, rec=FALSE, full.names = T) # w/ full names
-      files <- setdiff(list.files(path, full.names = T, pattern = pattern), folders)
+      files <- setdiff(list.files(path, full.names = T, pattern = pattern, ignore.case = TRUE), folders)
       # sort in descending order if asked for
       if (sort_desc) {
         folders <- rev(folders)
