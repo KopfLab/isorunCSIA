@@ -1,9 +1,20 @@
 #' UTILITY FUNCTIONS
 
-get_setting <- function(data, variable, default = "") {
+get_setting <- function(data, variable, default = NULL) {
   setting <- filter(data, Variable == variable)
   if (nrow(setting) == 0) return(default)
   else return(setting$Value)
+}
+
+#' splits string by | to make vector, interprets x=y entries with x as entry name
+vectorize_setting_string <- function(x) {
+  strsplit(x, split="|", fixed = T)[[1]] %>%
+    lapply(function(i) {
+      name_col_split <- strsplit(i, split="=", fixed = T)[[1]]
+      if (length(name_col_split) == 2) list(name_col_split[2]) %>% setNames(name_col_split[1])
+      else if (length(name_col_split) == 1) list(name_col_split[1]) %>% setNames(name_col_split[1])
+    }) %>%
+    unlist()
 }
 
 #' error round (not used yet)
@@ -119,9 +130,9 @@ generate_summary_table <- function(df, functions, cols = c(), n_col = NULL, col_
          paste(missing_cols, collapse = ", "), call. = FALSE)
   }
 
-  # rename columns
+  # rename+select columns
   rename_cols <- paste0("`", cols, "`") %>% setNames(names(cols))
-  df <- df %>% rename_(.dots = rename_cols)
+  df <- suppressMessages(df %>% select_(.dots = rename_cols))
 
   # numbering column
   if (!is.null(n_col)) {

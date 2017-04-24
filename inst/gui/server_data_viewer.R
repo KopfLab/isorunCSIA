@@ -32,7 +32,7 @@ observe({
 
 # keep track of double click in the data files list
 observe({
-  message("here: ", input$data_file_list_dblclick) #FIXME: this is a debug message
+  #message("here: ", input$data_file_list_dblclick) #FIXME: this is a debug message
 })
 
 # remove data files from consideration
