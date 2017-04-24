@@ -86,11 +86,12 @@ ui <- dashboardPage(
                                    link_wrapper = h4, allow_upload = FALSE),
 
             div(id = "on_offs_div",
-                h4("ON/OFFs"),
-                guiDataTable("on_offs_table")
+                h3("ON/OFFs"),
+                guiDataTable("on_offs_table"),
+                h4(actionLink("on_off_archive", "Record ON/OFF information", icon = icon("archive")), textOutput("on_off_archive_status"), inline=TRUE)
             ) %>% shinyjs::hidden(),
 
-            h4("Linearity")
+            h3("Linearity")
           )
 
         ),

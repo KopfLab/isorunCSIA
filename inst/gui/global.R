@@ -10,6 +10,7 @@ library(readxl)
 library(rhandsontable)
 library(dtplyr)
 library(dplyr)
+library(lazyeval)
 library(tidyr)
 library(DT)
 `%then%` <- shiny:::`%OR%`

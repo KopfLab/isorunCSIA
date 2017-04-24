@@ -22,10 +22,7 @@ server <- shinyServer(function(input, output, session) {
     scan_files_list = c(),
     scan_files_selected = c(),
     scan_files_objects = list(),
-    scan_files_data = NULL,
-    lin_on_off_objects = list(),
-    lin_data_table = NULL,
-    on_off_data_table = NULL
+    scan_files_data = NULL
   )
 
   # INSTRUMENT NEW PARAMETER RECORD ----
