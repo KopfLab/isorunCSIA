@@ -36,3 +36,8 @@ vignettes/*.pdf
 # Local build
 .local
 
+# gem lock file
+Gemfile.lock
+
+# development
+dev/
