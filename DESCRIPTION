@@ -1,6 +1,6 @@
 Package: isorunCSIA
 Type: Package
-Version: 0.2.8
+Version: 0.3.0
 Date: 2017-01-15
 Author: Sebastian Kopf
 Maintainer: Sebastian Kopf <sebastian.kopf@colorado.edu>
@@ -11,30 +11,23 @@ BugReports: https://github.com/kopflab/isorunCSIA/issues
 Imports:
     methods,
     R.utils,
-    Rcpp,
-    isoread,
     tidyr,
     dplyr,
     ggplot2,
-    plotly (>= 4.5.6.900)
-Suggests:
-    testthat,
-    rmarkdown,
-    knitr,
-    openxlsx,
+    plotly,
     shiny,
     shinyjs,
     shinyBS,
     shinydashboard,
     shinyAce,
-    dtplyr,
-    DT,
-    data.table,
+    shinycssloaders,
     rhandsontable,
+    DT
+Suggests:
+    testthat,
+    rmarkdown,
+    knitr,
     devtools
 VignetteBuilder: knitr
-Collate:
-    'gui.R'
-    'loading.R'
-    'package.R'
-RoxygenNote: 5.0.1
+Encoding: UTF-8
+RoxygenNote: 6.1.0
