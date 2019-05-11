@@ -137,7 +137,8 @@ CREATE TABLE instrument_logs
   FOREIGN KEY (instrument_id, session_id, mode_id) REFERENCES sessions (instrument_id, session_id, mode_id) on update cascade,
   data_dbl double precision NULL,
   data_lgl boolean NULL,
-  notes text NULL
+  notes text NULL,
+  UNIQUE (instrument_id, field_id, mode_id, session_id)
 );
 
 SELECT * FROM instrument_logs;
